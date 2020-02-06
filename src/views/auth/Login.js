@@ -39,6 +39,13 @@ export default class Login extends Component {
       .then(res => {
         // save token in local storage
         localStorage.setItem('jwtToken', res.data.token);
+        // save user details in local storage
+        var userInfo = {
+          email: user.email,
+          
+        };
+        localStorage.setItem('userEmail', res.data.user.email);
+        localStorage.setItem('userEmail', res.data.user.email);
         console.log(res.data);
         this.props.history.goBack();
       })

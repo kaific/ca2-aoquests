@@ -5,6 +5,34 @@ const router = require('express').Router();
 
 let User = require('../models/User');
 
+const getToken = (headers) => {
+    if(headers && headers.authorization) {
+        let parted = headers.authorization.split(' ');
+        if(parted.length === 2) {
+        return parted[1];
+        }
+        else {
+        return null;
+        }
+    }
+    else {
+        return null;
+    }
+};
+
+router.route('/users').get(passport.authenticate('jwt', { session: false }), (req, res) => {
+    const token = getToken(req.headers);
+    if(token && req.user.role === "admin") {
+        User.find()
+        // .select(['email', 'signUpDate', 'isDeleted'])
+        .then(users => res.json(users))
+        .catch(err => res.status(400).json('Error: ' + err));
+    }
+    else {
+        return res.status(403).json({message: "Unauthorised."});
+    }
+});
+
 router.post('/register', (req, res) => {
     const { body } = req;
     const { password } = body;
@@ -28,7 +56,8 @@ router.post('/register', (req, res) => {
 
     // Verify email doesn't already exist.
     User.find({
-        email: email
+        email: email,
+        isDeleted: false
     }, (err, previousUsers) => {
         if(err) {
             return res.json({
@@ -97,7 +126,11 @@ router.post('/login', (req, res) => {
             let token = jwt.sign(user.toJSON(), process.env.API_SECRET);
             res.json({
                 success: true,
-                token: 'JWT ' + token
+                token: 'JWT ' + token,
+                user: {
+                    email: user.email,
+                    role: user.role
+                }
             });
         }
         else {
@@ -107,6 +140,20 @@ router.post('/login', (req, res) => {
             });
         }
     });
+});
+
+router.put('/:id', (req, res) => {
+    const userId = req.params.id;
+    const newUser = req.body;
+
+    User.findByIdAndUpdate(userId, newUser, {new: true})
+        .then(user => {
+            if(!user) {
+                return res.status(404).json({message: "User not found."});
+            }
+            res.json(user);
+        })
+        .catch(err => res.status(400));
 });
 
 module.exports = router;
