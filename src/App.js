@@ -1,26 +1,58 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+import Container from 'react-bootstrap/Container';
+import { Row, Col } from 'react-bootstrap';
+import { BrowserRouter, Route, Switch, Redirect, /*BrowserHistory*/ } from 'react-router-dom';
+
+import Register from './views/auth/Register';
+import Login from './views/auth/Login';
+
+import NpcIndex from './views/npcs/Index';
+import NpcShow from './views/npcs/Show';
+import NpcCreate from './views/npcs/Create';
+import NpcEdit from './views/npcs/Edit';
+
+import QuestCreate from './views/quests/Create';
+
+import MyNavbar from './components/MyNavbar'
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loggedIn: localStorage.getItem('jwtToken') !== null
+    }
+  };
 
-export default App;
+  authHandler = () => {
+    this.setState((state, props) => ({
+      loggedIn: state.loggedIn ? false : true
+    }));
+  };
+
+  render() {
+    const loggedIn = this.state.loggedIn;
+    return (
+      <BrowserRouter>
+        <MyNavbar loggedIn={loggedIn} onLogout={this.authHandler} />
+        <Container>
+          <Row>
+          <Col>
+            <Switch>
+              <Route path="/register" exact component={(props) => <Register {...props} onLogin={this.authHandler} />} />
+              <Route path="/login" exact component={(props) => <Login {...props} onLogin={this.authHandler} />}/>
+              <Route path="/npcs" exact component={NpcIndex} />
+              <Route exact path="/npcs/create">{loggedIn ? <NpcCreate/> : <Redirect to="/" />}</Route>
+              <Route path="/npcs/:id" exact component={NpcShow} />
+              <Route path="/npcs/:id/edit">{loggedIn ? <NpcEdit/> : <Redirect to="/" />}</Route>
+              <Route path="/quests/create">{loggedIn ? <QuestCreate/> : <Redirect to="/" />}</Route>
+            </Switch>
+          </Col>
+          </Row>
+        </Container>
+      </BrowserRouter>
+    );
+  }
+}
