@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from 'react-bootstrap/Navbar';
-import Nav from 'react-bootstrap/Nav'
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
 export default class MyNavbar extends Component {
   logout = () => {
@@ -22,17 +21,16 @@ export default class MyNavbar extends Component {
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/npcs">NPCs</Nav.Link>
             <Nav.Link as={Link} to="/quests">Quests</Nav.Link>
-            {loggedIn &&
-              <>
-              <Nav.Link as={Link} to="/npcs/create">Create NPC</Nav.Link>
-              <Nav.Link as={Link} to="/quests/create">Create Quest</Nav.Link>
-              </>
-            }
           </Nav>
           <Nav>
             {loggedIn ? (
               <>
-              <Nav.Link onClick={this.logout}>Logout</Nav.Link>
+              <NavDropdown title={this.props.userInfo.email ? this.props.userInfo.email : ""} id="basic-nav-dropdown">
+                <NavDropdown.Item as={Link} to="/npcs/create">Create NPC</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/quests/create">Create Quest</NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item onClick={this.logout}>Log Out</NavDropdown.Item>
+              </NavDropdown>
               </>
             ) : (
               <>

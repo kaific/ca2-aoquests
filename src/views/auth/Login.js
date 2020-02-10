@@ -10,7 +10,6 @@ export default class Login extends Component {
       email: '',
       password: ''
     };
-
   }
 
   handleInputChange = e => {
@@ -28,6 +27,8 @@ export default class Login extends Component {
   onSubmit = e => {
     e.preventDefault();
 
+    this.props.history.push('/');
+
     const user = {
       email: this.state.email,
       password: this.state.password
@@ -41,13 +42,14 @@ export default class Login extends Component {
         localStorage.setItem('jwtToken', res.data.token);
         // save user details in local storage
         var userInfo = {
-          email: user.email,
-          
+          email: res.data.user.email,
+          user: res.data.user.role
         };
-        localStorage.setItem('userEmail', res.data.user.email);
-        localStorage.setItem('userEmail', res.data.user.email);
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
         console.log(res.data);
-        this.props.history.goBack();
+        this.props.history.push('/');
+        window.location.reload();
       })
       .catch((err) => {
         if(err.response.status === 401) {

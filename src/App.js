@@ -22,7 +22,8 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loggedIn: localStorage.getItem('jwtToken') !== null
+      loggedIn: localStorage.getItem('jwtToken') !== null,
+      userInfo: JSON.parse(localStorage.getItem('userInfo'))
     }
   };
 
@@ -34,9 +35,10 @@ export default class App extends Component {
 
   render() {
     const loggedIn = this.state.loggedIn;
+    const userInfo = this.state.userInfo;
     return (
       <BrowserRouter>
-        <MyNavbar loggedIn={loggedIn} onLogout={this.authHandler} />
+        <MyNavbar loggedIn={loggedIn} userInfo={userInfo} onLogout={this.authHandler} />
         <Container>
           <Row>
           <Col>

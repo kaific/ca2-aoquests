@@ -3,6 +3,10 @@ import axios from 'axios';
 import { Form, Row, Col, Button, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
+const Zone = props => (
+    <option value={props.zone}>{props.zone}</option>
+);
+
 const NPC = props => (
     <option value={props.npc._id}>{props.npc.name}</option>
 );
@@ -29,8 +33,10 @@ export default class QuestCreate extends Component {
             missions: [],
             mission: {
                 description: ``,
+                zone: '',
                 giver: '',
             },
+            zones: [],
             npcs: [],
             loading: true
         }
@@ -43,17 +49,21 @@ export default class QuestCreate extends Component {
             var newMission = this.state.mission;
             newMission.giver = response.data[0]._id;
             // console.log('mission', newMission);
+            newMission.zone = response.data[0].zone;
 
             var npcs = response.data;
+            console.log(response.data)
+            var zones = [];
             var npcsByZone = [];
             npcs.map(npc => {
-                if(!npcsByZone.includes(npc.zone)) {
-                    var obj = {name: npc.zone, npcs: []};
+                if(!zones.includes(npc.zone)) {
+                    zones.push(npc.zone);
+                    var obj = {zone: npc.zone, npcs: []};
                     npcsByZone.push(obj);
                 }
                 var simpleNpc = {_id: npc._id, name: npc.name};
                 npcsByZone.map(zone => {
-                    if(zone.name === npc.zone) {
+                    if(zone.zone == npc.zone) {
                         zone.npcs.push(simpleNpc);
                     }
                     return null;
@@ -62,10 +72,13 @@ export default class QuestCreate extends Component {
             });
 
             this.setState({
+                zones,
                 npcs: npcsByZone,
                 loading: false,
                 mission: newMission
             });
+
+            console.log(this.state);
         })
         .catch(error => {
             console.log(error);
@@ -97,6 +110,10 @@ export default class QuestCreate extends Component {
                 obj[objAttr] = npc[0]._id;
             }
 
+            if(objAttr === "zone") {
+
+            }
+
             this.setState({
                 obj
             });
@@ -111,6 +128,9 @@ export default class QuestCreate extends Component {
     };
 
     onAddMission = () => {
+        if(this.state.mission.description.length == 0 || this.state.mission.giver.length == 0) {
+            return;
+        }
         var newMish = this.state.mission;
         var newDesc = newMish.description.charAt(0).toUpperCase() + newMish.description.substring(1);
         newMish.description = newDesc;
@@ -128,10 +148,6 @@ export default class QuestCreate extends Component {
     onSubmit = e => {
         e.preventDefault();
 
-        // let genreJSON = this.state.genre.map((name, index) => {
-        //     return {name};
-        // });
-
         const quest = {
             name: this.state.name,
         };
@@ -145,9 +161,22 @@ export default class QuestCreate extends Component {
         window.location = '/';
     };
 
+    zoneList() {
+        console.log(this.state.zones)
+        return this.state.zones.map((zone, index) => {
+            return <Zone zone={zone} key={index}/>
+        });
+    }
+
     npcList() {
-        return this.state.npcs.map(npc => {
-            return <NPC npc={npc} key={npc._id}/>
+        return this.state.npcs.map((zone) => {
+            if(this.state.mission.zone == zone.zone) {
+                return zone.npcs.map((npc, index) => {
+                    console.log("current npc: ", npc);
+                    console.log("current zone: ", zone.zone == this.state.mission.zone);
+                    return <NPC npc={npc} key={index}/>
+                });
+            }
         });
     }
 
@@ -184,7 +213,15 @@ export default class QuestCreate extends Component {
                             <Form.Group as={Col} sm={12} controlId="formHorizontalMissions">
                                 <Row>
                                 <Form.Label column sm={2}>NPC:</Form.Label>
-                                <Col sm={8}>
+                                <Col sm={4}>
+                                    <Form.Control as="select"
+                                        name="mission.zone"
+                                        onChange={this.handleInputChange}
+                                    >
+                                        { this.zoneList() }
+                                    </Form.Control>
+                                </Col>
+                                <Col sm={4}>
                                     <Form.Control as="select"
                                         name="mission.giver"
                                         onChange={this.handleInputChange}
