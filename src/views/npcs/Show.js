@@ -35,12 +35,6 @@ export default class NpcEdit extends Component {
         });
     }
 
-    // genreList() {
-    //     return this.state.npc.genre.map((currentGenre, index) => {
-    //         return <Genre genre={currentGenre.name} key={index} />;
-    //     });
-    // }
-
     render() {
         const { npc, loading } = this.state;
         const { id } = this.props.match.params;
@@ -82,8 +76,9 @@ export default class NpcEdit extends Component {
                             </Col>
                         </Row>
                         <Button as={Link} to="/npcs" variant="primary">View all npcs</Button>
-                        <Button as={Link} to={"/npcs/"+id+"/edit"} variant="warning">Edit</Button>
-                        <Button as={Link} to={"/npcs/"+id+"/edit"} variant="danger">Delete</Button>
+                        <Button as={Link} to={`/npcs/${id}/edit`} variant="warning">Edit</Button>
+                        {/* <Button as={Link} to={`/npcs/${id}/edit`} variant="warning">Edit</Button> */}
+                        <Button as={Link} to={`/npcs/${id}/edit`} variant="danger">Delete</Button>
                     </Card.Body>
                 </Card>
             </div>

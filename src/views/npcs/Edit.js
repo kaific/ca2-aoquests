@@ -31,6 +31,7 @@ export default class NpcEdit extends Component {
             this.setState({
                 npc: response.data,
                 name: response.data.name,
+                id: response.data.id,
                 zone: response.data.zone,
                 coords: response.data.coords,
                 // genre: [...genres],
@@ -107,9 +108,12 @@ export default class NpcEdit extends Component {
         window.location = '/';
     };
 
-    onDelete(id) {
+    onDelete() {
+        const { id } = this.props.match.params;
+
+        axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
         axios.delete('http://localhost:4000/npcs/' + id)
-        .then(res => console.log(res.data))
+        .then(res => console.log(res))
         .catch(err => console.log(err));
 
         window.location = '/npcs';
@@ -185,7 +189,7 @@ export default class NpcEdit extends Component {
                     <Col sm={ { span: 10, offset: 2 } }>
                         <Button type="submit" variant="success">Save</Button>
                         <Button as={Link} to="/" variant="primary">Cancel</Button>
-                        <Button onClick={this.onDelete(this.state.npc._id)} variant="danger">Delete</Button>
+                        <Button onClick={this.onDelete()} variant="danger">Delete</Button>
                     </Col>
                 </Form.Group>
             </Form>

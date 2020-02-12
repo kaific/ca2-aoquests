@@ -102,8 +102,14 @@ export default class QuestCreate extends Component {
             obj[objAttr] = value;
 
             if(objAttr === "giver") {
-                const npc = this.state.npcs.filter(npc => {
-                    if(npc._id === value) return npc;
+                const npc = this.state.npcs.filter(zone => {
+                    if(zone.zone === this.state.mission.zone) {
+                        const npcNest = zone.npcs.filter(npc => {
+                            if(npc._id === value) return npc;
+                            return null;
+                        });
+                        return npcNest;
+                    }
                     return null;
                 });
 
@@ -111,7 +117,11 @@ export default class QuestCreate extends Component {
             }
 
             if(objAttr === "zone") {
-
+                const zone = this.state.npcs.filter(zone => {
+                    if(zone.zone === value) return zone.zone;
+                    return null;
+                });
+                obj[objAttr] = zone[0];
             }
 
             this.setState({

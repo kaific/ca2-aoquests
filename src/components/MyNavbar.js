@@ -6,7 +6,7 @@ export default class MyNavbar extends Component {
   logout = () => {
     localStorage.removeItem('jwtToken');
     this.props.onLogout();
-    // window.location = '/';
+    window.location = '/';
   };
 
   render() {

@@ -48,7 +48,7 @@ export default class App extends Component {
               <Route path="/npcs" exact component={NpcIndex} />
               <Route exact path="/npcs/create">{loggedIn ? <NpcCreate/> : <Redirect to="/" />}</Route>
               <Route path="/npcs/:id" exact component={NpcShow} />
-              <Route path="/npcs/:id/edit">{loggedIn ? <NpcEdit/> : <Redirect to="/" />}</Route>
+              <Route exact path="/npcs/:id/edit">{loggedIn ? (props) => <NpcEdit {...props} /> : <Redirect to="/" />}</Route>
               <Route path="/quests/create">{loggedIn ? <QuestCreate/> : <Redirect to="/" />}</Route>
             </Switch>
           </Col>

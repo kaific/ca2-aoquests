@@ -128,6 +128,7 @@ router.post('/login', (req, res) => {
                 success: true,
                 token: 'JWT ' + token,
                 user: {
+                    _id: user._id,
                     email: user.email,
                     role: user.role
                 }
@@ -142,18 +143,42 @@ router.post('/login', (req, res) => {
     });
 });
 
-router.put('/:id', (req, res) => {
+router.get('/:id', (req, res) => {
     const userId = req.params.id;
-    const newUser = req.body;
-
-    User.findByIdAndUpdate(userId, newUser, {new: true})
+    
+    User.findById(userId)
         .then(user => {
             if(!user) {
                 return res.status(404).json({message: "User not found."});
             }
-            res.json(user);
+            res.json({
+                _id: user._id,
+                email: user.email,
+                role: user.role,
+                signUpDate: user.signUpDate,
+                isDeleted: user.isDeleted
+            });
         })
-        .catch(err => res.status(400));
+        .catch(err => res.status(400).json({error: err}));
+});
+
+router.route('/:id').put(passport.authenticate('jwt', { session: false }), (req, res) => {
+    const userId = req.params.id;
+    const newUser = req.body;
+    const token = getToken(req.headers);
+    if(token && req.user.role === "admin") {
+        User.findByIdAndUpdate(userId, newUser, {new: true})
+            .then(user => {
+                if(!user) {
+                    return res.status(404).json({message: "User not found."});
+                }
+                res.json(user);
+            })
+            .catch(err => res.status(400).json({error: err}));
+    }
+    else {
+        return res.status(403).json({message: "Unauthorised."});
+    }
 });
 
 module.exports = router;
