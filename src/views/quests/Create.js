@@ -1,28 +1,40 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Form, Row, Col, Button, InputGroup } from 'react-bootstrap';
+import { Form, Row, Col, Button, InputGroup, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-const Zone = props => (
-    <option value={props.zone}>{props.zone}</option>
-);
+class Zone extends Component {
+    render() {
+        return (
+            <option value={this.props.zone}>{this.props.zone}</option>
+        );
+    }
+}
 
-const NPC = props => (
-    <option value={props.npc._id}>{props.npc.name}</option>
-);
+class NPC extends Component {
+    render() {
+        return (
+            <option value={this.props.npc._id}>{this.props.npc.name}</option>
+        );
+    }
+}
 
-const Mission = props => (
-    <>
-    <Row as={Col}>
-        {props.mission.description.split('\n').map((line, index) => {
-            return (
-                <React.Fragment key={index}>{line}<br/></React.Fragment>
-            );
-        })} 
-        from {props.mission.giver.name}
-    </Row><br/>
-    </>
-);
+class Mission extends Component {
+    render() {
+        return (
+            <>
+            <Row as={Col}>
+                {this.props.mission.description.split('\n').map((line, index) => {
+                    return (
+                        <React.Fragment key={index}>{line}<br/></React.Fragment>
+                    );
+                })} 
+                from {this.props.mission.giver.name}
+            </Row><br/>
+            </>
+        );
+    }
+}
 
 export default class QuestCreate extends Component {
     constructor(props) {
@@ -30,11 +42,17 @@ export default class QuestCreate extends Component {
 
         this.state = {
             name: '',
+            location: 'Rubi-Ka',
+            locations: ['Rubi-Ka', 'Shadowlands', 'APF', 'Legacy of the Xan'],
             missions: [],
             mission: {
                 description: ``,
                 zone: '',
                 giver: '',
+                objective: '',
+                reward: 'None',
+                location: 'Rubi-Ka',
+                dialogue: null
             },
             zones: [],
             npcs: [],
@@ -45,16 +63,14 @@ export default class QuestCreate extends Component {
     componentDidMount() {
         axios.get(`http://localhost:4000/npcs`)
         .then(response => {
-            // console.log("response:", response);
             var newMission = this.state.mission;
-            newMission.giver = response.data[0]._id;
-            // console.log('mission', newMission);
+            newMission.giver = response.data[0];
             newMission.zone = response.data[0].zone;
 
             var npcs = response.data;
-            console.log(response.data)
             var zones = [];
             var npcsByZone = [];
+
             npcs.map(npc => {
                 if(!zones.includes(npc.zone)) {
                     zones.push(npc.zone);
@@ -63,7 +79,7 @@ export default class QuestCreate extends Component {
                 }
                 var simpleNpc = {_id: npc._id, name: npc.name};
                 npcsByZone.map(zone => {
-                    if(zone.zone == npc.zone) {
+                    if(zone.zone === npc.zone) {
                         zone.npcs.push(simpleNpc);
                     }
                     return null;
@@ -77,24 +93,36 @@ export default class QuestCreate extends Component {
                 loading: false,
                 mission: newMission
             });
-
-            console.log(this.state);
         })
         .catch(error => {
             console.log(error);
         });
     }
 
-    handleInputChange = e => {
+    handleInputChange = async e => {
         const target = e.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-
         console.log(`Input name ${name}. Input value ${value}.`);
 
-        //check for nested object attribute
-        if(name.match('[A-z].[A-z]')) {
-        // if(name.includes('.')) {
+        if(name === 'checkDlg') {
+            var mission = this.state.mission;
+            if(value) {
+                mission.dialogue = {npcDialogue: [], chatOptions: []};
+            }
+            else {
+                mission.dialogue = null;
+            }
+            await this.setState({
+                mission
+            });
+            console.log(this.state.mission)
+            return;
+        }
+
+        //check for nested object attribute e.g. mission.giver (state.mission.giver)
+        // if(name.match('[A-z].[A-z]')) {
+        if(name.includes('.')) {
             var splitName = name.split(".");
             var objName = splitName[0];
             var objAttr = splitName[1];
@@ -112,23 +140,25 @@ export default class QuestCreate extends Component {
                     }
                     return null;
                 });
-
-                obj[objAttr] = npc[0]._id;
+                console.log("npc: ", npc[0])
+                obj[objAttr] = npc[0];
             }
 
             if(objAttr === "zone") {
                 const zone = this.state.npcs.filter(zone => {
                     if(zone.zone === value) return zone.zone;
+
                     return null;
                 });
-                obj[objAttr] = zone[0];
+                obj[objAttr] = zone[0].zone;
+                // console.log(obj)
             }
 
             this.setState({
-                obj
+                [objName]: obj
             });
 
-            console.log(this.state[objName]);
+            // console.log(this.state[objName]);
         }
         else {
             this.setState({
@@ -138,7 +168,7 @@ export default class QuestCreate extends Component {
     };
 
     onAddMission = () => {
-        if(this.state.mission.description.length == 0 || this.state.mission.giver.length == 0) {
+        if(this.state.mission.description.length === 0 || this.state.mission.giver.name.length === 0) {
             return;
         }
         var newMish = this.state.mission;
@@ -147,9 +177,10 @@ export default class QuestCreate extends Component {
         this.setState({ mission: newMish });
         this.setState(state => {
             const missions = [...state.missions, state.mission];
+            console.log("missions ", missions)
             return {
                 missions,
-                mission: {description: ``, giver: this.state.npcs[0]}
+                mission: {description: ``, zone: this.state.npcs[0].zone}
             };
         });
         
@@ -160,19 +191,19 @@ export default class QuestCreate extends Component {
 
         const quest = {
             name: this.state.name,
+            location: this.state.location
         };
 
         console.log(quest);
 
-        axios.post('http://localhost:4000/quests', quest)
-        .then(res => console.log(res.data))
-        .catch(err => console.log(err));
+        // axios.post('http://localhost:4000/quests', quest)
+        // .then(res => console.log(res.data))
+        // .catch(err => console.log(err));
 
-        window.location = '/';
+        // window.location = '/';
     };
 
     zoneList() {
-        console.log(this.state.zones)
         return this.state.zones.map((zone, index) => {
             return <Zone zone={zone} key={index}/>
         });
@@ -180,13 +211,12 @@ export default class QuestCreate extends Component {
 
     npcList() {
         return this.state.npcs.map((zone) => {
-            if(this.state.mission.zone == zone.zone) {
+            if(this.state.mission.zone === zone.zone) {
                 return zone.npcs.map((npc, index) => {
-                    console.log("current npc: ", npc);
-                    console.log("current zone: ", zone.zone == this.state.mission.zone);
                     return <NPC npc={npc} key={index}/>
                 });
             }
+            return null;
         });
     }
 
@@ -197,83 +227,215 @@ export default class QuestCreate extends Component {
     }
 
     render() {
+        const { loading, locations } = this.state;
+        
+        if(loading) {
+            return (
+                <>
+                <br/>
+                <Card>
+                    <Card.Body>
+                        Loading...
+                    </Card.Body>
+                </Card>
+                </>
+            );
+        }
+
         return (
             <>
-            <h3>Add new Quest</h3>
-            <Form onSubmit={this.onSubmit}>
-                <Form.Group as={Row} controlId="formHorizontalName">
-                    <Form.Label column sm={2}>
-                        Name of Quest
-                    </Form.Label>
-                    <Col sm={10}>
-                        <Form.Control type="text" placeholder="Name"
-                            name="name"
-                            value={this.state.name}
-                            onChange={this.handleInputChange}
-                        />
-                    </Col>
-                </Form.Group>
-
-                <Form.Group as={Row} controlId="formHorizontalMissions">
-                    <Form.Label column sm={2}>
-                        Missions
-                    </Form.Label>
-                    <Col>
-                        <InputGroup as={Row} noGutters>
-                            <Form.Group as={Col} sm={12} controlId="formHorizontalMissions">
-                                <Row>
-                                <Form.Label column sm={2}>NPC:</Form.Label>
-                                <Col sm={4}>
+            <br/>
+            <Col>
+                <Card>
+                    <Card.Header as="h3">Add new Quest</Card.Header>
+                    <Card.Body>
+                        <Form onSubmit={this.onSubmit}>
+                            {
+                            /*
+                             *
+                             *  QUEST NAME
+                             * 
+                            */
+                            }
+                            <Form.Group as={Row} controlId="formHorizontalName">
+                                <Form.Label column sm={2}>
+                                    Name:
+                                </Form.Label>
+                                <Col sm={10}>
+                                    <Form.Control type="text" placeholder="Name"
+                                        name="name"
+                                        value={this.state.name}
+                                        onChange={this.handleInputChange}
+                                    />
+                                </Col>
+                            </Form.Group>
+                            {
+                            /*
+                             *
+                             *  QUEST LOCATION
+                             * 
+                            */
+                            }
+                            <Form.Group as={Row} controlId="formHorizontalLocation">
+                                <Form.Label column sm={2}>
+                                    Location:
+                                </Form.Label>
+                                <Col sm={10}>
                                     <Form.Control as="select"
-                                        name="mission.zone"
+                                        name="location"
                                         onChange={this.handleInputChange}
                                     >
-                                        { this.zoneList() }
+                                        {locations.map((l, index) => { return (<option key={index} value={l}>{l}</option>) })}
                                     </Form.Control>
                                 </Col>
-                                <Col sm={4}>
-                                    <Form.Control as="select"
-                                        name="mission.giver"
-                                        onChange={this.handleInputChange}
-                                    >
-                                        { this.npcList() }
-                                    </Form.Control>
-                                </Col>
-                                <Col sm={2}>
-                                    <Button as={Link} to={{pathname: "/npcs/create", state: { prevPath: '/quests/create' }}} variant="outline-success">
-                                        New
-                                    </Button>
-                                </Col>
-                                </Row>
                             </Form.Group>
-                            <Form.Group as={Col} sm={12} controlId="formHorizontalGenre">
-                                <Form.Control as="textarea" placeholder="Mission description"
-                                    name="mission.description"
-                                    value={this.state.mission.description}
-                                    onChange={this.handleInputChange}
-                                />
+                            {
+                            /*
+                             *
+                             *  QUEST MISSIONS
+                             * 
+                            */
+                            }
+                            <Form.Group as={Row} controlId="formHorizontalMissions">
+                                <Form.Label column sm={2}>
+                                    Missions:
+                                </Form.Label>
+                                <Col>
+                                    {
+                                    /*
+                                    *
+                                    *  MISSION LIST
+                                    * 
+                                    */
+                                    }
+                                    { this.missionList() }
+                                    <InputGroup as={Row} noGutters>
+                                        {
+                                        /*
+                                        *
+                                        *  MISSION NPC
+                                        * 
+                                        */
+                                        }
+                                        <Form.Group as={Col} sm={12} controlId="formHorizontalMissionNPC">
+                                            <Row>
+                                                <Form.Label column sm="auto" className="pr-0">NPC:</Form.Label>
+                                                <Col className="pr-1">
+                                                    <Form.Control as="select"
+                                                        name="mission.zone"
+                                                        onChange={this.handleInputChange}
+                                                    >
+                                                        { this.zoneList() }
+                                                    </Form.Control>
+                                                </Col>
+                                                <Col className="pl-1">
+                                                    <Form.Control as="select"
+                                                        name="mission.giver"
+                                                        onChange={this.handleInputChange}
+                                                    >
+                                                        { this.npcList() }
+                                                    </Form.Control>
+                                                </Col>
+                                                <Col sm="auto" className="pl-1">
+                                                    <Button as={Link} to={{pathname: "/npcs/create", state: { prevPath: '/quests/create' }}} variant="outline-success">
+                                                        New
+                                                    </Button>
+                                                </Col>
+                                            </Row>
+                                        </Form.Group>
+                                        {
+                                        /*
+                                        *
+                                        *  MISSION DESCRIPTION
+                                        * 
+                                        */
+                                        }
+                                        <Form.Group as={Col} sm={12} controlId="formHorizontalMissionDescription">
+                                            <Form.Control as="textarea" placeholder="Mission description"
+                                                name="mission.description"
+                                                value={this.state.mission.description}
+                                                onChange={this.handleInputChange}
+                                            />
+                                        </Form.Group>
+                                        {
+                                        /*
+                                        *
+                                        *  MISSION OBJECTIVE
+                                        * 
+                                        */
+                                        }
+                                        <Form.Group as={Col} sm={12} controlId="formHorizontalMissionObjective">
+                                            <Row>
+                                            <Form.Label column sm={2} className="pr-0">
+                                                Objective:
+                                            </Form.Label>
+                                            <Col sm={10}>
+                                                <Form.Control type="text" placeholder="Mission objective"
+                                                    name="mission.objective"
+                                                    value={this.state.mission.objective}
+                                                    onChange={this.handleInputChange}
+                                                />
+                                            </Col>
+                                            </Row>
+                                        </Form.Group>
+                                        {
+                                        /*
+                                        *
+                                        *  MISSION REWARD
+                                        * 
+                                        */
+                                        }
+                                        <Form.Group as={Col} sm={12} controlId="formHorizontalMissionReward">
+                                            <Row>
+                                            <Form.Label column sm={2} className="pr-0">
+                                                Reward:
+                                            </Form.Label>
+                                            <Col sm={10}>
+                                                <Form.Control type="text" placeholder="Mission reward"
+                                                    name="mission.reward"
+                                                    value={this.state.mission.reward}
+                                                    onChange={this.handleInputChange}
+                                                />
+                                            </Col>
+                                            </Row>
+                                        </Form.Group>
+                                        {
+                                        /*
+                                        *
+                                        *  MISSION DIALOGUE
+                                        * 
+                                        */
+                                        }
+                                        <Form.Group as={Col} sm={12} controlId="formHorizontalMissionDialogue">
+                                            {/***** CHECK *****/}
+                                            <Form.Check
+                                                type='checkbox'
+                                                name='checkDlg'
+                                                onChange={this.handleInputChange}
+                                                label="This mission has NPC dialogue."
+                                            />
+                                            
+                                            {/***** NPC DIALOGUE *****/}
+                                            
+                                        </Form.Group>
+                                        <InputGroup.Append as={Col} sm={12} className="justify-content-md-center">
+                                            <Button onClick={this.onAddMission} variant="outline-success">
+                                                Add Mission
+                                            </Button>
+                                        </InputGroup.Append>
+                                    </InputGroup>
+                                </Col>
                             </Form.Group>
-                            <InputGroup.Append as={Col} sm={12} className="justify-content-md-center">
-                                <Button onClick={this.onAddMission} variant="outline-success">
-                                    Add Mission
-                                </Button>
-                            </InputGroup.Append>
-                        </InputGroup>
-                    </Col>
-                </Form.Group>
 
-                <Row>
-                    <Col sm={ { span: 10, offset: 2 } }>
-                        { this.missionList() }
-                    </Col>
-                </Row>
-
-                <Form.Group as={Row}>
-                    <Col sm={ { span: 10, offset: 2 } }>
-                        <Button type="submit">Add Quest</Button>
-                    </Col>
-                </Form.Group>
-            </Form>
+                            <Form.Group as={Row}>
+                                <Col sm={ { span: 10, offset: 2 } }>
+                                    <Button type="submit">Add Quest</Button>
+                                </Col>
+                            </Form.Group>
+                        </Form>
+                    </Card.Body>
+                </Card>
+            </Col>
             </>
         );
     }

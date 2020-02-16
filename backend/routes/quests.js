@@ -16,9 +16,9 @@ router.route('/').get((req, res) => {
           populate: {
             path: "giver",
             model: 'Npc',
-            select: ['name', 'zone', 'coords']
+            select: '-missions -__v'
           },
-          select: ['name -quest', 'description', 'dialogue']
+          select: '-__v'
         })
         .exec()
         .then(quests => res.json(quests))
@@ -33,8 +33,17 @@ router.route('/').get((req, res) => {
     const questId = req.params.id;
     
     Quest.findById(questId)
-    .populate('missions')
-    .populate('missions.giver')
+    .populate({
+      path: 'missions',
+      model: 'Mission',
+      populate: {
+        path: "giver",
+        model: 'Npc',
+        select: '-missions -__v'
+      },
+      select: '-__v'
+    })
+    .exec()
     .then(result => {
       if(!result) {
         return res.status(404).json({
@@ -77,11 +86,18 @@ router.route('/').get((req, res) => {
     // }
   
     const newQuest = new Quest(quest);
-    newQuest.save()
-            .then(() => {
-              res.json('Quest added!');
-            })
-            .catch(err => res.status(400).json('Error: ' + err));
+    newQuest.save((err, result) => {
+      if(err) return res.status(400).json('Error: ' + err);
+      res.json({
+        message: "Quest added!",
+        data: result
+      })
+    })
+    // newQuest.save()
+    //         .then(() => {
+    //           res.json('Quest added!');
+    //         })
+    //         .catch(err => res.status(400).json('Error: ' + err));
   });
   
   // ======================

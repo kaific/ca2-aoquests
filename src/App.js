@@ -3,6 +3,8 @@ import Container from 'react-bootstrap/Container';
 import { Row, Col } from 'react-bootstrap';
 import { BrowserRouter, Route, Switch, Redirect, /*BrowserHistory*/ } from 'react-router-dom';
 
+import HomePage from './components/HomePage';
+
 import Register from './views/auth/Register';
 import Login from './views/auth/Login';
 
@@ -11,6 +13,8 @@ import NpcShow from './views/npcs/Show';
 import NpcCreate from './views/npcs/Create';
 import NpcEdit from './views/npcs/Edit';
 
+import QuestIndex from './views/quests/Index';
+import QuestShow from './views/quests/Show';
 import QuestCreate from './views/quests/Create';
 
 import MyNavbar from './components/MyNavbar'
@@ -35,21 +39,24 @@ export default class App extends Component {
 
   render() {
     const loggedIn = this.state.loggedIn;
-    const userInfo = this.state.userInfo;
+    const user = this.state.userInfo;
     return (
       <BrowserRouter>
-        <MyNavbar loggedIn={loggedIn} userInfo={userInfo} onLogout={this.authHandler} />
+        <MyNavbar loggedIn={loggedIn} userInfo={user} onLogout={this.authHandler} />
         <Container>
           <Row>
           <Col>
             <Switch>
+              <Route path="/" exact component={HomePage} />
               <Route path="/register" exact component={(props) => <Register {...props} onLogin={this.authHandler} />} />
               <Route path="/login" exact component={(props) => <Login {...props} onLogin={this.authHandler} />}/>
-              <Route path="/npcs" exact component={NpcIndex} />
-              <Route exact path="/npcs/create">{loggedIn ? <NpcCreate/> : <Redirect to="/" />}</Route>
-              <Route path="/npcs/:id" exact component={NpcShow} />
-              <Route exact path="/npcs/:id/edit">{loggedIn ? (props) => <NpcEdit {...props} /> : <Redirect to="/" />}</Route>
-              <Route path="/quests/create">{loggedIn ? <QuestCreate/> : <Redirect to="/" />}</Route>
+              <Route path="/npcs" exact component={(NpcIndex)} />
+              <Route path="/quests" exact component={QuestIndex} />
+              <Route exact path="/npcs/create">{loggedIn && user.role === 'admin' ? (props) => <NpcCreate {...props} /> : <Redirect to="/" />}</Route>
+              <Route path="/npcs/:id" exact component={(props) => <NpcShow {...props} loggedIn={loggedIn}/>} />
+              <Route exact path="/npcs/:id/edit">{loggedIn && user.role === 'admin' ? (props) => <NpcEdit {...props} /> : <Redirect to="/" />}</Route>
+              <Route path="/quests/create" exact component={loggedIn && user.role === 'admin' ? (props) => <QuestCreate {...props} /> : <Redirect to="/" />}/>
+              <Route path="/quests/:id" exact component={(props) => <QuestShow {...props} loggedIn={loggedIn}/>} />
             </Switch>
           </Col>
           </Row>

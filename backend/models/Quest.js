@@ -3,6 +3,11 @@ const mongoose = require('mongoose');
 
 const QuestSchema = new mongoose.Schema({
   name: String,
+  location: {
+    type: String,
+    enum: ['Rubi-Ka', 'Shadowlands', 'APF', 'Legacy of the Xan', 'undefined'],
+    default: 'undefined'
+  }
   // missions: [{
   //   type: mongoose.Schema.Types.ObjectId,
   //   ref: 'Mission'

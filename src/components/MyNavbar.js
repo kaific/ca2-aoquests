@@ -5,6 +5,7 @@ import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 export default class MyNavbar extends Component {
   logout = () => {
     localStorage.removeItem('jwtToken');
+    localStorage.removeItem('userInfo');
     this.props.onLogout();
     window.location = '/';
   };

@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { Card, Button, Row, Col } from 'react-bootstrap';
+import { Card, Button, Row, Col, Form } from 'react-bootstrap';
 
 // const Genre = props => (
 //     <Badge variant="light">{props.genre}</Badge>
 // );
 
-export default class NpcEdit extends Component {
+export default class NpcShow extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
             npc: {},
-            loading: true
+            loading: true,
+            loggedIn: props.loggedIn
         };
     }
 
@@ -36,7 +37,7 @@ export default class NpcEdit extends Component {
     }
 
     render() {
-        const { npc, loading } = this.state;
+        const { npc, loading, loggedIn } = this.state;
         const { id } = this.props.match.params;
 
         if(loading) {
@@ -48,40 +49,62 @@ export default class NpcEdit extends Component {
         }
 
         return (
-            <div>
-                <br/>
+            <>
+            <br/>
+            <Col sm={{span: 8, offset: 2}}>
                 <Card>
                     <Card.Header as="h5">
-                        {npc.name} {/* <span className="float-right">{ this.genreList() }</span> */}
+                        {npc.name}
                     </Card.Header>
                     <Card.Body>
-                        {/* <Card.Title>Synposis</Card.Title>
-                        <Card.Text>
-                            There is no synopsis in the DB.
-                        </Card.Text> */}
                         <Row>
-                            <Col sm={3}>
+                            <Col sm={3} xs={6}>
                                 Zone:
                             </Col>
-                            <Col sm={9}>
+                            <Col sm={9} xs={6}>
                                 {npc.zone}
                             </Col>
                         </Row>
                         <Row>
-                            <Col sm={3}>
+                            <Col sm={3} xs={6}>
                                 Coords:
                             </Col>
-                            <Col sm={9}>
-                                [{npc.coords.x}, {npc.coords.z}, {npc.coords.pf}]
+                            <Col sm={9} xs={6}>
+                                x: {npc.coords.x} &nbsp;&nbsp;z: {npc.coords.z} &nbsp;&nbsp;pf: {npc.coords.pf}
                             </Col>
                         </Row>
-                        <Button as={Link} to="/npcs" variant="primary">View all npcs</Button>
-                        <Button as={Link} to={`/npcs/${id}/edit`} variant="warning">Edit</Button>
-                        {/* <Button as={Link} to={`/npcs/${id}/edit`} variant="warning">Edit</Button> */}
-                        <Button as={Link} to={`/npcs/${id}/edit`} variant="danger">Delete</Button>
+                        <Row className="pt-2">
+                            <Col sm={{span: 9, offset: 3}} xs={{span: 6, offset: 6}}>
+                                <Row className="px-3">
+                                    <Col sm={5} className="px-0">
+                                        <Form.Control
+                                            id="waypoint"
+                                            type="text"
+                                            value={`/waypoint ${npc.coords.x} ${npc.coords.z} ${npc.coords.pf}`}
+                                            readOnly
+                                        />
+                                    </Col>
+                                    <Col sm={7}>
+                                        <Button onClick={this.copyWp} variant="success">Copy</Button>
+                                    </Col>
+                                </Row>
+                            </Col>
+                        </Row>
+                        <Row as={Col} className="pt-3">
+                            <Button as={Link} to="/npcs" variant="primary">View all npcs</Button>&nbsp;
+                            {loggedIn ?
+                                <>
+                                <Button as={Link} to={`/npcs/${id}/edit`} variant="warning">Edit</Button>&nbsp;
+                                <Button as={Link} to={`/npcs/${id}/edit`} variant="danger">Delete</Button>
+                                </>
+                            :
+                            <></>
+                            }
+                        </Row>
                     </Card.Body>
                 </Card>
-            </div>
+            </Col>
+            </>
         );
     }
 }

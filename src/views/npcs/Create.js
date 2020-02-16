@@ -61,10 +61,13 @@ export default class NpcCreate extends Component {
             this.props.history.push("/login");
         });
 
-        window.location = '/npcs';
+        // window.location = '/npcs';
+        this.props.history.goBack();
+        window.location.reload();
     };
 
     render() {
+        console.log(this.props.history)
         return (
             <>
             <h3>Add new Npc</h3>
@@ -126,7 +129,8 @@ export default class NpcCreate extends Component {
 
                 <Form.Group as={Row}>
                     <Col sm={ { span: 10, offset: 2 } }>
-                        <Button type="submit">Add NPC</Button>
+                        <Button type="submit">Add NPC</Button>&nbsp;
+                        <Button onClick={this.props.history.goBack}>Cancel</Button>
                     </Col>
                 </Form.Group>
             </Form>

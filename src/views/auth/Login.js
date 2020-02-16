@@ -17,7 +17,7 @@ export default class Login extends Component {
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
 
-    console.log(`Input name ${name}. Input value ${value}.`);
+    // console.log(`Input name ${name}. Input value ${value}.`);
 
     this.setState({
       [name]: value
@@ -43,7 +43,7 @@ export default class Login extends Component {
         // save user details in local storage
         var userInfo = {
           email: res.data.user.email,
-          user: res.data.user.role
+          role: res.data.user.role
         };
         localStorage.setItem('userInfo', JSON.stringify(userInfo));
 

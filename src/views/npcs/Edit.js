@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Form, Row, Col, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Form, Row, Col, Button, Card } from 'react-bootstrap';
+// import { Link } from 'react-router-dom';
 
 export default class NpcEdit extends Component {
     constructor(props) {
@@ -18,23 +18,22 @@ export default class NpcEdit extends Component {
             },
             loading: true
         }
+
+        this.onDelete = this.onDelete.bind(this);
     }
 
     componentDidMount() {
         const { id } = this.props.match.params;
 
-        console.log(this.props);
         axios.get(`http://localhost:4000/npcs/${id}`)
         .then(response => {
-            console.log("response:", response);
-            // let genres = response.data.genre.map(g => g.name);
+            // console.log("response:", response);
             this.setState({
                 npc: response.data,
                 name: response.data.name,
                 id: response.data.id,
                 zone: response.data.zone,
                 coords: response.data.coords,
-                // genre: [...genres],
                 loading: false,
 
             });
@@ -71,41 +70,29 @@ export default class NpcEdit extends Component {
         console.log(this.state);
     };
 
-    // onAddGenre = () => {
-    //     this.setState(state => {
-    //         const genre = [...state.genre, state.genreText];
-    //         return {
-    //             genre,
-    //             genreText: ''
-    //         };
-    //     });
-    // };
-
     onSubmit = e => {
         e.preventDefault();
 
-        // let genreJSON = this.state.genre.map((name, index) => {
-        //     return {name};
-        // });
+        const { id } = this.props.match.params;
 
         const npc = {
             name: this.state.name,
             zone: this.state.zone,
-            // genre: genreJSON
             coords: this.state.coords
         };
 
         console.log(npc);
 
         axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
-        axios.put('http://localhost:4000/npcs', npc)
-        .then(res => console.log(res.data))
+        axios.put(`http://localhost:4000/npcs/${id}`, npc)
+        .then(res => {
+            console.log(res.data);
+            this.props.history.goBack();
+        })
         .catch(err => {
             console.log(err)
             this.props.history.push("/login");
         });
-
-        window.location = '/';
     };
 
     onDelete() {
@@ -119,80 +106,95 @@ export default class NpcEdit extends Component {
         window.location = '/npcs';
     }
 
-    // genreList() {
-    //     return this.state.genre.map((currentGenre, index) => {
-    //         return <Genre genre={currentGenre} key={index} />;
-    //     });
-    // }
-
     render() {
+        const { loading } = this.state;
+
+        if(loading) {
+            return (
+                <div>
+                    <h3>Loading...</h3>
+                </div>
+            )
+        }
+
         return (
             <>
-            <h3>Add new Npc</h3>
-            <Form onSubmit={this.onSubmit}>
-                <Form.Group as={Row} controlId="formHorizontalName">
-                    <Form.Label column sm={2}>
-                        Name of NPC
-                    </Form.Label>
-                    <Col sm={10}>
-                        <Form.Control type="text" placeholder="Name"
-                            name="name"
-                            value={this.state.name}
-                            onChange={this.handleInputChange}
-                        />
-                    </Col>
-                </Form.Group>
+            <Card>
+                <Card.Header as="h3">Add new NPC</Card.Header>
+                <Card.Body>
+                    <Form onSubmit={this.onSubmit}>
+                        <Form.Group as={Row} controlId="formHorizontalName">
+                            <Form.Label column sm={2}>
+                                Name:
+                            </Form.Label>
+                            <Col sm={10}>
+                                <Form.Control type="text" placeholder="Name"
+                                    name="name"
+                                    value={this.state.name}
+                                    onChange={this.handleInputChange}
+                                />
+                            </Col>
+                        </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalZone">
-                    <Form.Label column sm={2}>
-                        Zone
-                    </Form.Label>
-                    <Col sm={10}>
-                        <Form.Control type="text" placeholder="Zone Name" 
-                            name="zone"
-                            value={this.state.zone}
-                            onChange={this.handleInputChange}
-                        />
-                    </Col>
-                </Form.Group>
+                        <Form.Group as={Row} controlId="formHorizontalZone">
+                            <Form.Label column sm={2}>
+                                Zone:
+                            </Form.Label>
+                            <Col sm={10}>
+                                <Form.Control type="text" placeholder="Zone Name" 
+                                    name="zone"
+                                    value={this.state.zone}
+                                    onChange={this.handleInputChange}
+                                />
+                            </Col>
+                        </Form.Group>
 
-                <Form.Group as={Row} controlId="formHorizontalCoords">
-                    <Form.Label column sm={2}>
-                        Coordinates
-                    </Form.Label>
-                    <Col>
-                        <Form.Control type="number" placeholder="X" 
-                            name="coords.x"
-                            value={this.state.coords.x}
-                            onChange={this.handleInputChange}
-                        />
-                    </Col>
-                    <Col>
-                        <Form.Control type="number" placeholder="Z" 
-                            name="coords.z"
-                            value={this.state.coords.z}
-                            onChange={this.handleInputChange}
-                        />
-                    </Col>
-                    <Col>
-                        <Form.Control type="number" placeholder="PF" 
-                            name="coords.pf"
-                            value={this.state.coords.pf}
-                            onChange={this.handleInputChange}
-                        />
-                    </Col>
-                </Form.Group>
+                        <Form.Group as={Row} controlId="formHorizontalCoords">
+                            <Form.Label column sm={2}>
+                                Coords:
+                            </Form.Label>
+                            <Form.Label column sm="auto" className="pr-0">
+                                x:
+                            </Form.Label>
+                            <Col>
+                                <Form.Control type="number" placeholder="X" 
+                                    name="coords.x"
+                                    value={this.state.coords.x}
+                                    onChange={this.handleInputChange}
+                                />
+                            </Col>
+                            <Form.Label column sm="auto" className="pr-0">
+                                z:
+                            </Form.Label>
+                            <Col>
+                                <Form.Control type="number" placeholder="Z" 
+                                    name="coords.z"
+                                    value={this.state.coords.z}
+                                    onChange={this.handleInputChange}
+                                />
+                            </Col>
+                            <Form.Label column sm="auto" className="pr-0">
+                                pf:
+                            </Form.Label>
+                            <Col>
+                                <Form.Control type="number" placeholder="PF" 
+                                    name="coords.pf"
+                                    value={this.state.coords.pf}
+                                    onChange={this.handleInputChange}
+                                />
+                            </Col>
+                        </Form.Group>
 
-                <br/>
-
-                <Form.Group as={Row}>
-                    <Col sm={ { span: 10, offset: 2 } }>
-                        <Button type="submit" variant="success">Save</Button>
-                        <Button as={Link} to="/" variant="primary">Cancel</Button>
-                        <Button onClick={this.onDelete()} variant="danger">Delete</Button>
-                    </Col>
-                </Form.Group>
-            </Form>
+                        <Form.Group as={Row}>
+                            <Col sm={ { span: 10, offset: 2 } }>
+                                <Button type="submit" variant="success">Save</Button>&nbsp;
+                                <Button onClick={this.props.history.goBack} variant="primary">Cancel</Button>&nbsp;
+                                <Button onClick={this.onDelete} variant="danger">Delete</Button>
+                            </Col>
+                        </Form.Group>
+                    </Form>
+                </Card.Body>
+            </Card>
             </>
         );
     }
