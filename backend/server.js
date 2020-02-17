@@ -18,11 +18,16 @@ app.use(cors());
 
 const uri = process.env.ATLAS_URI;
 
-mongoose.connect(uri, {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-  useCreateIndex: true
-});
+try {
+  mongoose.connect(uri, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useCreateIndex: true
+  });
+}
+catch(error) {
+  res.json({ error });
+}
 
 const connection = mongoose.connection;
 

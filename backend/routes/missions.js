@@ -65,7 +65,7 @@ router.route("/").post(async (req, res) => {
       res.json({ message: "Missions added successfully!" });   
     }
     catch(err) {
-      res.json()
+      res.json({ error: err })
     }
   }
   // Single Mission
