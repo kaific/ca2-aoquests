@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "nodemon ./server.js"
   },
-  "author": "Mohammed Che",
+  "author": "Kai Fic",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^3.0.7",
