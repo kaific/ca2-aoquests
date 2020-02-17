@@ -7,10 +7,9 @@ const mongoose = require('mongoose');
 const npcsRouter = require('./routes/npcs');
 const missionsRouter = require('./routes/missions');
 const questsRouter = require('./routes/quests');
+const authRouter = require('./routes/auth');
 
 const app = express();
-
-const authRouter = require('./routes/auth');
 
 app.use(body_parser.json());
 app.use(cors());

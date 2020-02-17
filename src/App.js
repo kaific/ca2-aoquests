@@ -52,11 +52,13 @@ export default class App extends Component {
               <Route path="/login" exact component={(props) => <Login {...props} onLogin={this.authHandler} />}/>
               <Route path="/npcs" exact component={(NpcIndex)} />
               <Route path="/quests" exact component={QuestIndex} />
-              <Route exact path="/npcs/create">{loggedIn && user.role === 'admin' ? (props) => <NpcCreate {...props} /> : <Redirect to="/" />}</Route>
+
+              <Route path="/npcs/create" exact component={loggedIn && user.role === 'admin' ? (props) => <NpcCreate {...props}/> : <Redirect to="/"/>}/>
+              <Route path="/npcs/:id/edit" exact component={loggedIn && user.role === 'admin' ? (props) => <NpcEdit {...props} loggedIn={loggedIn}/> : <Redirect to="/"/>}/>
+              <Route path="/quests/create" exact component={loggedIn && user.role === 'admin' ? (props) => <QuestCreate {...props}/> : <Redirect to="/"/>}/>
+
               <Route path="/npcs/:id" exact component={(props) => <NpcShow {...props} loggedIn={loggedIn}/>} />
-              <Route exact path="/npcs/:id/edit">{loggedIn && user.role === 'admin' ? (props) => <NpcEdit {...props} /> : <Redirect to="/" />}</Route>
-              <Route path="/quests/create" exact component={loggedIn && user.role === 'admin' ? (props) => <QuestCreate {...props} /> : <Redirect to="/" />}/>
-              <Route path="/quests/:id" exact component={(props) => <QuestShow {...props} loggedIn={loggedIn}/>} />
+              <Route path="/quests/:id" exact component={(props) => <QuestShow {...props} loggedIn={loggedIn}/>}/>
             </Switch>
           </Col>
           </Row>
