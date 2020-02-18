@@ -51,7 +51,7 @@ export default class QuestCreate extends Component {
                 giver: '',
                 objective: '',
                 reward: 'None',
-                location: 'Rubi-Ka',
+                checkDlg: false,
                 dialogue: null
             },
             zones: [],
@@ -105,7 +105,7 @@ export default class QuestCreate extends Component {
         const name = target.name;
         console.log(`Input name ${name}. Input value ${value}.`);
 
-        if(name === 'checkDlg') {
+        if(name.includes('checkDlg')) {
             var mission = this.state.mission;
             if(value) {
                 mission.dialogue = {npcDialogue: [], chatOptions: []};
@@ -113,6 +113,7 @@ export default class QuestCreate extends Component {
             else {
                 mission.dialogue = null;
             }
+            mission.checkDlg = value;
             await this.setState({
                 mission
             });
@@ -180,7 +181,15 @@ export default class QuestCreate extends Component {
             console.log("missions ", missions)
             return {
                 missions,
-                mission: {description: ``, zone: this.state.npcs[0].zone}
+                mission: {
+                    description: ``,
+                    zone: this.state.npcs[0].zone,
+                    giver: this.state.npcs[0],
+                    objective: '',
+                    reward: 'None',
+                    checkDlg: false,
+                    dialogue: null
+                }
             };
         });
         
@@ -227,7 +236,7 @@ export default class QuestCreate extends Component {
     }
 
     render() {
-        const { loading, locations } = this.state;
+        const { loading, locations, mission } = this.state;
         
         if(loading) {
             return (
@@ -353,7 +362,7 @@ export default class QuestCreate extends Component {
                                         <Form.Group as={Col} sm={12} controlId="formHorizontalMissionDescription">
                                             <Form.Control as="textarea" placeholder="Mission description"
                                                 name="mission.description"
-                                                value={this.state.mission.description}
+                                                value={mission.description}
                                                 onChange={this.handleInputChange}
                                             />
                                         </Form.Group>
@@ -410,13 +419,14 @@ export default class QuestCreate extends Component {
                                             {/***** CHECK *****/}
                                             <Form.Check
                                                 type='checkbox'
-                                                name='checkDlg'
+                                                name='mission.checkDlg'
                                                 onChange={this.handleInputChange}
                                                 label="This mission has NPC dialogue."
+                                                checked={this.state.mission.checkDlg}
                                             />
                                             
                                             {/***** NPC DIALOGUE *****/}
-                                            
+                                            {}
                                         </Form.Group>
                                         <InputGroup.Append as={Col} sm={12} className="justify-content-md-center">
                                             <Button onClick={this.onAddMission} variant="outline-success">
