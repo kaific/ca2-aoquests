@@ -246,9 +246,12 @@ export default class QuestCreate extends Component {
     }
 
     missionList() {
-        return this.state.missions.map((mission, index) => {
-            return <Mission mission={mission} key={index}/>
-        });
+        if(this.state.missions.length > 0) {
+            return this.state.missions.map((mission, index) => {
+                return <Mission mission={mission} key={index}/>
+            });
+        }
+        return "You have not added any missions yet."
     }
 
     render() {
@@ -271,8 +274,8 @@ export default class QuestCreate extends Component {
             <>
             <br/>
             <Col>
-                <Card>
-                    <Card.Header as="h3">Add new Quest</Card.Header>
+                <Card border="secondary">
+                    <Card.Header><h3 className="my-1 text-secondary">Add new Quest</h3></Card.Header>
                     <Card.Body>
                         <Form onSubmit={this.onSubmit}>
                             {
@@ -282,10 +285,12 @@ export default class QuestCreate extends Component {
                              * 
                             */
                             }
-                            <Form.Group as={Row} controlId="formHorizontalName">
-                                <Form.Label column sm={2}>
-                                    Name:
-                                </Form.Label>
+                            <Form.Group as={Row} controlId="formHorizontalName" noGutters>
+                                <Col sm={2}>
+                                    <Form.Label column className="px-0">
+                                        Name:
+                                    </Form.Label>
+                                </Col>
                                 <Col sm={10}>
                                     <Form.Control type="text" placeholder="Name"
                                         name="name"
@@ -301,10 +306,12 @@ export default class QuestCreate extends Component {
                              * 
                             */
                             }
-                            <Form.Group as={Row} controlId="formHorizontalLocation">
-                                <Form.Label column sm={2}>
-                                    Location:
-                                </Form.Label>
+                            <Form.Group as={Row} controlId="formHorizontalLocation" noGutters>
+                                <Col sm={2}>
+                                    <Form.Label column className="px-0">
+                                        Location:
+                                    </Form.Label>
+                                </Col>
                                 <Col sm={10}>
                                     <Form.Control as="select"
                                         name="location"
@@ -322,18 +329,13 @@ export default class QuestCreate extends Component {
                             */
                             }
                             <Form.Group as={Row} controlId="formHorizontalMissions">
-                                <Form.Label column sm={2}>
+                                <Col sm={2}>
+                                <Form.Label column className="px-0">
                                     Missions:
                                 </Form.Label>
-                                <Col>
-                                    {
-                                    /*
-                                    *
-                                    *  MISSION LIST
-                                    * 
-                                    */
-                                    }
-                                    { this.missionList() }
+                                </Col>
+                                <Col sm={10}>
+                                    <Card body border="success" className="mx-0">
                                     <InputGroup as={Row} noGutters>
                                         {
                                         /*
@@ -362,7 +364,7 @@ export default class QuestCreate extends Component {
                                                     </Form.Control>
                                                 </Col>
                                                 <Col sm="auto" className="pl-1">
-                                                    <Button as={Link} to={{pathname: "/npcs/create", state: { prevPath: '/quests/create' }}} variant="outline-success">
+                                                    <Button as={Link} to={{pathname: "/npcs/create", state: { prevPath: '/quests/create' }}} variant="success">
                                                         New
                                                     </Button>
                                                 </Col>
@@ -445,20 +447,37 @@ export default class QuestCreate extends Component {
                                             <>
                                             {/***** NPC DIALOGUE *****/}
                                             <br/>
-                                            <Card><Card.Body>
+                                            <Card body border="info">
+                                                <h6 className="text-info">NPC Dialogue Entries</h6>
                                             <InputGroup as={Row} noGutters>
-                                                <Form.Control as="textarea" placeholder="NPC Dialogue (after '<Name>: ')"
-                                                    name="newNpcDialogue"
-                                                    value={this.state.newNpcMessage.content}
-                                                    onChange={this.handleInputChange}
-                                                />
-                                                <InputGroup.Append as={Col}>
-                                                    <Button onClick={this.onAddNpcDlg} variant="outline-success">
-                                                        Add NPC Line
+                                                <Col>
+                                                <InputGroup as={Row}>
+                                                    <Col sm={5}>
+                                                    <Form.Control as="textarea" placeholder="NPC Dialogue (after '<Name>: ')"
+                                                        name="newNpcMessage.content"
+                                                        value={this.state.newNpcMessage.content}
+                                                        onChange={this.handleInputChange}
+                                                    />
+                                                    </Col>
+                                                    <Col sm="auto">
+
+                                                    </Col>
+                                                    <Col sm="auto">
+                                                    <InputGroup.Append>
+                                                        <Button onClick={this.onAddNpcMsg} variant="outline-success">
+                                                            Add NPC Line
+                                                        </Button>
+                                                    </InputGroup.Append>
+                                                    </Col>
+                                                </InputGroup>
+                                                </Col>
+                                                <InputGroup.Append as={Col} sm={12} className="pt-3 justify-content-md-center">
+                                                    <Button onClick={this.onAddNpcDlg} variant="outline-info">
+                                                        Add NPC Dialogue
                                                     </Button>
                                                 </InputGroup.Append>
                                             </InputGroup>
-                                            </Card.Body></Card>
+                                            </Card>
 
                                             {/***** CHAT OPTIONS *****/}
                                             </>
@@ -471,12 +490,23 @@ export default class QuestCreate extends Component {
                                             </Button>
                                         </InputGroup.Append>
                                     </InputGroup>
+                                    <h6 className="text-success">Missions Added</h6>
+                                    {
+                                    /*
+                                    *
+                                    *  MISSION LIST
+                                    * 
+                                    */
+                                    }
+                                    { this.missionList() }
+                                    </Card>
                                 </Col>
                             </Form.Group>
 
                             <Form.Group as={Row}>
-                                <Col sm={ { span: 10, offset: 2 } }>
-                                    <Button type="submit">Add Quest</Button>
+                                <Col sm={ { span: 10, offset: 2 } } className="pt-2">
+                                    <Button type="submit" variant="outline-secondary" className="mr-2"><h5 className="my-2">ADD QUEST</h5></Button>
+                                    <Button onClick={this.props.history.goBack} variant="outline-danger"><h5 className="my-2">CANCEL</h5></Button>
                                 </Col>
                             </Form.Group>
                         </Form>

@@ -1,6 +1,13 @@
 * {
   border-radius: 0 !important;
 }
+.quest-border {
+  border-color: #6610f2 !important;
+}
+
+.quest-header {
+  color: #6610f2 !important;
+}
 .App {
   text-align: center;
 }

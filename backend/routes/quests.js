@@ -78,12 +78,6 @@ router.route('/').get((req, res) => {
         message: "Quest name cannot be empty."
       });
     }
-
-    // if(!(quest.npc instanceof mongoose.Schema.Types.ObjectId)) {
-    //   return res.status(400).json({
-    //     message: "Incorrect NPC reference."
-    //   });
-    // }
   
     const newQuest = new Quest(quest);
     newQuest.save((err, result) => {
