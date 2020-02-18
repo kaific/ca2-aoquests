@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
@@ -45,3 +46,12 @@ export default class MyNavbar extends Component {
     );
   }
 }
+
+MyNavbar.propTypes = {
+  loggedIn: PropTypes.bool.isRequired,
+  userInfo: PropTypes.shape({
+    email: PropTypes.string,
+    role: PropTypes.string
+  }),
+  onLogout: PropTypes.func.isRequired
+};
