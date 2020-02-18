@@ -54,6 +54,22 @@ export default class QuestCreate extends Component {
                 checkDlg: false,
                 dialogue: null
             },
+            newNpcDialogue: {
+                messages: [],
+                trigger: 0
+            },
+            newNpcMessage: {
+                emote: false,
+                order: 0,
+                content: ''
+            },
+            newChatOption: {
+                reqOption: 0,
+                killOptions: [],
+                reqProgress: false,
+                id: 1,
+                content: ''
+            },
             zones: [],
             npcs: [],
             loading: true
@@ -425,8 +441,29 @@ export default class QuestCreate extends Component {
                                                 checked={this.state.mission.checkDlg}
                                             />
                                             
+                                            {mission.checkDlg ?
+                                            <>
                                             {/***** NPC DIALOGUE *****/}
-                                            {}
+                                            <br/>
+                                            <Card><Card.Body>
+                                            <InputGroup as={Row} noGutters>
+                                                <Form.Control as="textarea" placeholder="NPC Dialogue (after '<Name>: ')"
+                                                    name="newNpcDialogue"
+                                                    value={this.state.newNpcMessage.content}
+                                                    onChange={this.handleInputChange}
+                                                />
+                                                <InputGroup.Append as={Col}>
+                                                    <Button onClick={this.onAddNpcDlg} variant="outline-success">
+                                                        Add NPC Line
+                                                    </Button>
+                                                </InputGroup.Append>
+                                            </InputGroup>
+                                            </Card.Body></Card>
+
+                                            {/***** CHAT OPTIONS *****/}
+                                            </>
+                                            :
+                                            ''}
                                         </Form.Group>
                                         <InputGroup.Append as={Col} sm={12} className="justify-content-md-center">
                                             <Button onClick={this.onAddMission} variant="outline-success">
