@@ -8,6 +8,7 @@ class Zone extends Component {
         return (
             <option value={this.props.zone}>{this.props.zone}</option>
         );
+        
     }
 }
 
@@ -211,6 +212,25 @@ export default class QuestCreate extends Component {
         
     };
 
+    onAddNpcMsg = () => {
+      if(this.state.newNpcMessage.length === 0) {
+        return;
+      }
+      this.setState(state => {
+        var newNpcDialogue = state.newNpcDialogue;
+        newNpcDialogue.messages.push(state.newNpcMessage);
+        var newNpcMessage = {
+          emote: false,
+          content: '',
+          order: (state.newNpcMessage.order + 1)
+        }
+        return {
+          newNpcDialogue,
+          newNpcMessage
+        }
+      });
+    };
+
     onSubmit = e => {
         e.preventDefault();
 
@@ -252,6 +272,24 @@ export default class QuestCreate extends Component {
             });
         }
         return "You have not added any missions yet."
+    }
+
+    messageList() {
+      if(this.state.newNpcDialogue.messages.length > 0) {
+        return;
+      }
+      return "You have not added any messages yet."
+    }
+
+    npcTurnList() {
+      if(this.state.mission.dialogue.npcDialogue.length > 0) {
+        return;
+      }
+      return "You have not added an NPC turn yet."
+    }
+
+    chatOptionsList() {
+      return;
     }
 
     render() {
@@ -336,6 +374,7 @@ export default class QuestCreate extends Component {
                                 </Col>
                                 <Col sm={10}>
                                     <Card body border="success" className="mx-0">
+                                    <h6 className="text-success">New Mission</h6>
                                     <InputGroup as={Row} noGutters>
                                         {
                                         /*
@@ -448,38 +487,76 @@ export default class QuestCreate extends Component {
                                             {/***** NPC DIALOGUE *****/}
                                             <br/>
                                             <Card body border="info">
-                                                <h6 className="text-info">NPC Dialogue Entries</h6>
+                                            <h6 className="text-info">New NPC Dialogue Turn</h6>
+                                            <div>
+                                                A single NPC dialogue turn can have multiple messages, one after another, before the player gets to choose another chat option, including "emote" type messages, for example: <br/>
+                                                <Row>
+                                                  <Col sm="auto">
+                                                    <div className="border px-3 py-2 my-3 border-secondary text-secondary">
+                                                      <strong>Rex Larson:</strong> I'm not so sure.<br/>
+                                                      Rex Larson scratches his head. <small>(emote)</small><br/>
+                                                      <strong>Rex Larson:</strong> Have you tried turning it off and on again?<br/>
+                                                      You start wondering if this guy can help you at all. <small>(emote)</small>
+                                                    </div>
+                                                  </Col>
+                                                </Row>
+                                            </div>
                                             <InputGroup as={Row} noGutters>
                                                 <Col>
-                                                <InputGroup as={Row}>
-                                                    <Col sm={5}>
-                                                    <Form.Control as="textarea" placeholder="NPC Dialogue (after '<Name>: ')"
-                                                        name="newNpcMessage.content"
-                                                        value={this.state.newNpcMessage.content}
-                                                        onChange={this.handleInputChange}
-                                                    />
-                                                    </Col>
-                                                    <Col sm="auto">
-
-                                                    </Col>
-                                                    <Col sm="auto">
-                                                    <InputGroup.Append>
-                                                        <Button onClick={this.onAddNpcMsg} variant="outline-success">
-                                                            Add NPC Line
-                                                        </Button>
-                                                    </InputGroup.Append>
-                                                    </Col>
-                                                </InputGroup>
+                                                    <Card body border="danger">
+                                                      <h6 className="text-danger">New Message</h6>
+                                                      <InputGroup>
+                                                        <Col sm={12} className="px-0">
+                                                          <Form.Group controlId="newNpcMessageEmote">
+                                                            <Form.Check type="checkbox"
+                                                              name="newNpcMessage.emote"
+                                                              label="This is an emote message."
+                                                              checked={this.state.newNpcMessage.emote}
+                                                              onChange={this.handleInputChange}
+                                                            />
+                                                          </Form.Group>
+                                                        </Col>
+                                                        <Col sm={12} className="px-0">
+                                                          <Form.Control as="textarea" placeholder="NPC message excluding 'Speaker Name:', if not an emote."
+                                                              name="newNpcMessage.content"
+                                                              value={this.state.newNpcMessage.content}
+                                                              onChange={this.handleInputChange}
+                                                              rows="3"
+                                                          />
+                                                        </Col>
+                                                        <InputGroup.Append as={Col} sm={12} className="justify-content-sm-center pt-3 px-0">
+                                                            <Button onClick={this.onAddNpcMsg} variant="outline-danger">
+                                                                Add Message
+                                                            </Button>
+                                                        </InputGroup.Append>
+                                                      </InputGroup>
+                                                    </Card>
+                                                </Col>
+                                                <Col sm={12} className="px-0">
+                                                  <h6 className="text-danger pt-3">Messages Added</h6>
+                                                  {this.messageList()}
                                                 </Col>
                                                 <InputGroup.Append as={Col} sm={12} className="pt-3 justify-content-md-center">
                                                     <Button onClick={this.onAddNpcDlg} variant="outline-info">
-                                                        Add NPC Dialogue
+                                                        Add NPC Turn
                                                     </Button>
                                                 </InputGroup.Append>
                                             </InputGroup>
                                             </Card>
+                                            <Col sm={12} className="pt-3 px-0">
+                                              <h6 className="text-info">NPC Turns Added:</h6>
+                                              {this.npcTurnList()}
+                                            </Col>
 
                                             {/***** CHAT OPTIONS *****/}
+                                            <br/>
+                                            <Card body border="warning">
+
+                                            </Card>
+                                            <Col sm={12} className="pt-3 px-0">
+                                              <h6 className="text-warning">Chat Options Added:</h6>
+                                              {this.chatOptionsList()}
+                                            </Col>
                                             </>
                                             :
                                             ''}
@@ -490,7 +567,8 @@ export default class QuestCreate extends Component {
                                             </Button>
                                         </InputGroup.Append>
                                     </InputGroup>
-                                    <h6 className="text-success">Missions Added</h6>
+                                    </Card>
+                                    <h6 className="text-success pt-3">Missions Added</h6>
                                     {
                                     /*
                                     *
@@ -499,7 +577,6 @@ export default class QuestCreate extends Component {
                                     */
                                     }
                                     { this.missionList() }
-                                    </Card>
                                 </Col>
                             </Form.Group>
 
@@ -513,6 +590,7 @@ export default class QuestCreate extends Component {
                     </Card.Body>
                 </Card>
             </Col>
+            <br/>
             </>
         );
     }
