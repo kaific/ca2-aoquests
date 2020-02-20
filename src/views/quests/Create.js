@@ -289,7 +289,10 @@ export default class QuestCreate extends Component {
     }
 
     chatOptionsList() {
-      return;
+      if(this.state.mission.dialogue.chatOptions.length > 0) {
+        return;
+      }
+      return "You have not added any chat options yet."
     }
 
     render() {
@@ -544,17 +547,42 @@ export default class QuestCreate extends Component {
                                             </InputGroup>
                                             </Card>
                                             <Col sm={12} className="pt-3 px-0">
-                                              <h6 className="text-info">NPC Turns Added:</h6>
+                                              <h6 className="text-info">NPC Turns Added</h6>
                                               {this.npcTurnList()}
                                             </Col>
 
                                             {/***** CHAT OPTIONS *****/}
                                             <br/>
                                             <Card body border="warning">
-
+                                              <h6 className="text-danger">New Dialogue Option</h6>
+                                              <InputGroup>
+                                                <Col sm={12} className="px-0">
+                                                  <Form.Group controlId="newChatOption">
+                                                    <Form.Check type="checkbox"
+                                                      name="newNpcMessage.emote"
+                                                      label="This is an emote message."
+                                                      checked={this.state.newNpcMessage.emote}
+                                                      onChange={this.handleInputChange}
+                                                    />
+                                                  </Form.Group>
+                                                </Col>
+                                                <Col sm={12} className="px-0">
+                                                  <Form.Control as="textarea" placeholder="Dialogue option excluding 'Player Name:"
+                                                      name="newChatOption.content"
+                                                      value={this.state.newChatOption.content}
+                                                      onChange={this.handleInputChange}
+                                                      rows="3"
+                                                  />
+                                                </Col>
+                                                <InputGroup.Append as={Col} sm={12} className="justify-content-sm-center pt-3 px-0">
+                                                    <Button onClick={this.onAddOption} variant="outline-danger">
+                                                        Add Option
+                                                    </Button>
+                                                </InputGroup.Append>
+                                              </InputGroup>
                                             </Card>
                                             <Col sm={12} className="pt-3 px-0">
-                                              <h6 className="text-warning">Chat Options Added:</h6>
+                                              <h6 className="text-warning">Chat Options Added</h6>
                                               {this.chatOptionsList()}
                                             </Col>
                                             </>
