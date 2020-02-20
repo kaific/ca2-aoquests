@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Card, Button, Row, Col, Form } from 'react-bootstrap';
 
-import MissionInfo from '../../components/quests/MissionInfo';
+import { MissionInfo } from '../../components/quests/Read';
 
 export default class QuestShow extends Component {
     constructor(props) {

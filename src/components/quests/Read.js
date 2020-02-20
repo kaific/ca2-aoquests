@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Button, Row, Col, Form } from 'react-bootstrap';
 
-export default class MissionInfo extends Component {
+class MissionInfo extends Component {
     render() {
         const { chosenMission, chosenOptions } = this.props;
 
@@ -129,3 +129,5 @@ export default class MissionInfo extends Component {
         );
     }
 }
+
+export { MissionInfo };

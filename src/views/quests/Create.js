@@ -3,39 +3,7 @@ import axios from 'axios';
 import { Form, Row, Col, Button, InputGroup, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-class Zone extends Component {
-    render() {
-        return (
-            <option value={this.props.zone}>{this.props.zone}</option>
-        );
-        
-    }
-}
-
-class NPC extends Component {
-    render() {
-        return (
-            <option value={this.props.npc._id}>{this.props.npc.name}</option>
-        );
-    }
-}
-
-class Mission extends Component {
-    render() {
-        return (
-            <>
-            <Row as={Col}>
-                {this.props.mission.description.split('\n').map((line, index) => {
-                    return (
-                        <React.Fragment key={index}>{line}<br/></React.Fragment>
-                    );
-                })} 
-                from {this.props.mission.giver.name}
-            </Row><br/>
-            </>
-        );
-    }
-}
+import { Zone, NPC, Mission, NPCDialogue, NPCMessage, OptionTrigger, ChatOption } from '../../components/quests/Add'
 
 export default class QuestCreate extends Component {
     constructor(props) {
@@ -49,7 +17,7 @@ export default class QuestCreate extends Component {
             mission: {
                 description: ``,
                 zone: '',
-                giver: '',
+                giver: {},
                 objective: '',
                 reward: 'None',
                 checkDlg: false,
@@ -120,7 +88,7 @@ export default class QuestCreate extends Component {
         const target = e.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
-        console.log(`Input name ${name}. Input value ${value}.`);
+        // console.log(`Input name ${name}. Input value ${value}.`);
 
         if(name.includes('checkDlg')) {
             var mission = this.state.mission;
@@ -147,6 +115,10 @@ export default class QuestCreate extends Component {
             var obj = this.state[objName];
             obj[objAttr] = value;
 
+            if(objAttr === 'trigger' || objAttr === 'reqOption') {
+              obj[objAttr] = parseInt(value);
+            }
+
             if(objAttr === "giver") {
                 const npc = this.state.npcs.filter(zone => {
                     if(zone.zone === this.state.mission.zone) {
@@ -169,7 +141,25 @@ export default class QuestCreate extends Component {
                     return null;
                 });
                 obj[objAttr] = zone[0].zone;
-                // console.log(obj)
+                
+                var zoneIndex;
+                this.state.npcs.map((z, index) => {
+                  if(z.zone === zone[0].zone) {
+                    return zoneIndex = index;
+                  }
+                  return;
+                });
+
+                this.setState(state => {
+                  const giver = state.npcs[zoneIndex].npcs[0];
+                  var mission = state.mission;
+                  mission.giver = giver;
+                  return {
+                    mission
+                  }
+                })
+
+                console.log(this.state.mission)
             }
 
             this.setState({
@@ -231,6 +221,45 @@ export default class QuestCreate extends Component {
       });
     };
 
+    onAddNpcDlg = () => {
+        if(this.state.newNpcDialogue.messages.length > 0) {
+            this.setState(state => {
+                var mission = this.state.mission;
+                mission.dialogue.npcDialogue = [...state.mission.dialogue.npcDialogue, state.newNpcDialogue];
+
+                return {
+                    mission,
+                    newNpcDialogue : {
+                        messages: [],
+                        trigger: 0
+                    }
+                }
+            });
+        }
+        return;
+    };
+
+    onAddChatOption = () => {
+      if(this.state.newChatOption.content.length > 0) {
+        this.setState(state => {
+          var mission = this.state.mission;
+          mission.dialogue.chatOptions = [...mission.dialogue.chatOptions, state.newChatOption];
+          var newChatOption = {
+            reqOption: 1,
+            killOptions: [],
+            reqProgress: false,
+            id: (state.newChatOption.id + 1),
+            content: ''
+          };
+          
+          return {
+            mission, newChatOption
+          }
+        });
+      }
+      return;
+    };
+
     onSubmit = e => {
         e.preventDefault();
 
@@ -276,27 +305,41 @@ export default class QuestCreate extends Component {
 
     messageList() {
       if(this.state.newNpcDialogue.messages.length > 0) {
-        return;
+        return this.state.newNpcDialogue.messages.map((msg, index) => {
+            return <NPCMessage message={msg} npc={this.state.mission.giver} key={index} />
+        });
       }
       return "You have not added any messages yet."
     }
 
     npcTurnList() {
-      if(this.state.mission.dialogue.npcDialogue.length > 0) {
-        return;
+      const { mission } = this.state;
+      const npcDialogue = mission.dialogue.npcDialogue;
+      const npc = mission.giver;
+
+      if(npcDialogue.length > 0) {
+        return npcDialogue.map((dlg, index) => {
+          return <NPCDialogue dialogue={dlg} npc={npc} key={index} />
+        });
       }
-      return "You have not added an NPC turn yet."
+      return <Col>You have not added an NPC turn yet.</Col>
     }
 
     chatOptionsList() {
+      const { mission } = this.state;
+      const chatOptions = mission.dialogue.chatOptions;
+
       if(this.state.mission.dialogue.chatOptions.length > 0) {
-        return;
+        return chatOptions.map((opt, index) => {
+          return <ChatOption chatOption={opt} key={index} />
+        });
       }
-      return "You have not added any chat options yet."
+      return "You have not added any chat options yet.";
     }
 
     render() {
         const { loading, locations, mission } = this.state;
+        console.log(this.state.mission.dialogue)
         
         if(loading) {
             return (
@@ -536,8 +579,26 @@ export default class QuestCreate extends Component {
                                                     </Card>
                                                 </Col>
                                                 <Col sm={12} className="px-0">
-                                                  <h6 className="text-danger pt-3">Messages Added</h6>
+                                                  <h5 className="text-danger pt-3"><u>Messages Added</u></h5>
                                                   {this.messageList()}
+                                                </Col>
+                                                <Col sm={12} className="px-0 pt-3">
+                                                  <Form.Group as={Row} controlId="newNpcTurnTrigger">
+                                                    <Col sm={3}><Form.Label column sm="auto" className="px-0">Triggered by option:</Form.Label></Col>
+                                                    <Col sm={9}>
+                                                        <Form.Control as="select"
+                                                            name="newNpcDialogue.trigger"
+                                                            onChange={this.handleInputChange}
+                                                        >
+                                                          { mission.dialogue.chatOptions.length > 0 ? mission.dialogue.chatOptions.map((opt, i) => {
+                                                            return <OptionTrigger option={opt} key={i} />
+                                                          })
+                                                          :
+                                                          <option value="0">0 This is the starting turn.</option>
+                                                          }
+                                                        </Form.Control>
+                                                    </Col>
+                                                  </Form.Group>
                                                 </Col>
                                                 <InputGroup.Append as={Col} sm={12} className="pt-3 justify-content-md-center">
                                                     <Button onClick={this.onAddNpcDlg} variant="outline-info">
@@ -547,42 +608,67 @@ export default class QuestCreate extends Component {
                                             </InputGroup>
                                             </Card>
                                             <Col sm={12} className="pt-3 px-0">
-                                              <h6 className="text-info">NPC Turns Added</h6>
-                                              {this.npcTurnList()}
+                                              <h5 className="text-info"><u>NPC Turns Added</u></h5>
+                                              <Row>{this.npcTurnList()}</Row>
                                             </Col>
 
                                             {/***** CHAT OPTIONS *****/}
                                             <br/>
-                                            <Card body border="warning">
-                                              <h6 className="text-danger">New Dialogue Option</h6>
-                                              <InputGroup>
-                                                <Col sm={12} className="px-0">
-                                                  <Form.Group controlId="newChatOption">
+                                            <Card body border="option">
+                                            <Form.Group controlId="newChatOption" className="m-0">
+                                              <h6 className="text-option">New Player Dialogue Option</h6>
+                                              <Row noGutters>
+                                                <Col sm="auto" as={Card} border="secondary" className="px-3 py-1 my-2 text-secondary">
+                                                  <div><strong>Note:</strong>&nbsp;The "Goodbye" dialogue ending option is added at the end automatically.</div>
+                                                </Col>
+                                              </Row>
+                                              <InputGroup as={Row} noGutters>
+                                                <Col sm={12} className="px-0 pb-3">
                                                     <Form.Check type="checkbox"
-                                                      name="newNpcMessage.emote"
-                                                      label="This is an emote message."
-                                                      checked={this.state.newNpcMessage.emote}
+                                                      name="newChatOption.reqProgress"
+                                                      label="This option progresses the mission."
+                                                      checked={this.state.newChatOption.reqProgress}
                                                       onChange={this.handleInputChange}
                                                     />
-                                                  </Form.Group>
+                                                  
                                                 </Col>
                                                 <Col sm={12} className="px-0">
-                                                  <Form.Control as="textarea" placeholder="Dialogue option excluding 'Player Name:"
+                                                  <Form.Control as="textarea" placeholder="Dialogue option excluding 'Player Name:'"
                                                       name="newChatOption.content"
                                                       value={this.state.newChatOption.content}
                                                       onChange={this.handleInputChange}
                                                       rows="3"
                                                   />
                                                 </Col>
+                                                <Col sm={12} className="px-0">
+                                                  <Form.Group as={Row} className="pt-3" controlId="newChatOptionReq">
+                                                    <Col sm={3}><Form.Label column sm="auto" className="px-0">Required option:</Form.Label></Col>
+                                                    <Col sm={9}>
+                                                      <Form.Control as="select"
+                                                          name="newChatOption.reqOption"
+                                                          onChange={this.handleInputChange}
+                                                      >
+                                                        <option value="0">0 Available on start.</option>
+                                                        { mission.dialogue.chatOptions.length > 0 ? mission.dialogue.chatOptions.map((opt, i) => {
+                                                          return <OptionTrigger option={opt} key={i} />
+                                                        })
+                                                        :
+                                                        ""
+                                                        }
+                                                      </Form.Control>
+                                                    </Col>
+                                                  </Form.Group>
+                                                </Col>
                                                 <InputGroup.Append as={Col} sm={12} className="justify-content-sm-center pt-3 px-0">
-                                                    <Button onClick={this.onAddOption} variant="outline-danger">
+                                                    <Button onClick={this.onAddChatOption} variant="outline-option">
                                                         Add Option
                                                     </Button>
                                                 </InputGroup.Append>
                                               </InputGroup>
+                                            </Form.Group>
                                             </Card>
                                             <Col sm={12} className="pt-3 px-0">
-                                              <h6 className="text-warning">Chat Options Added</h6>
+                                              <h5 className="text-option"><u>Player Chat Options Added</u></h5>
                                               {this.chatOptionsList()}
                                             </Col>
                                             </>
@@ -596,7 +682,7 @@ export default class QuestCreate extends Component {
                                         </InputGroup.Append>
                                     </InputGroup>
                                     </Card>
-                                    <h6 className="text-success pt-3">Missions Added</h6>
+                                    <h5 className="text-success pt-3"><u>Missions Added</u></h5>
                                     {
                                     /*
                                     *
