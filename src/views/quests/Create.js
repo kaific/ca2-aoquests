@@ -260,6 +260,12 @@ export default class QuestCreate extends Component {
       return;
     };
 
+    popLastOption = () => {
+      var { mission } = this.state;
+      mission.dialogue.chatOptions.pop();
+      this.setState({ mission });
+    };
+
     onSubmit = e => {
         e.preventDefault();
 
@@ -633,12 +639,14 @@ export default class QuestCreate extends Component {
                                                   
                                                 </Col>
                                                 <Col sm={12} className="px-0">
-                                                  <Form.Control as="textarea" placeholder="Dialogue option excluding 'Player Name:'"
-                                                      name="newChatOption.content"
-                                                      value={this.state.newChatOption.content}
-                                                      onChange={this.handleInputChange}
-                                                      rows="3"
-                                                  />
+                                                  <Form.Group controlId="newChatOptionContent" className="m-0">
+                                                    <Form.Control as="textarea" placeholder="Dialogue option excluding 'Player Name:'"
+                                                        name="newChatOption.content"
+                                                        value={this.state.newChatOption.content}
+                                                        onChange={this.handleInputChange}
+                                                        rows="3"
+                                                    />
+                                                  </Form.Group>
                                                 </Col>
                                                 <Col sm={12} className="px-0">
                                                   <Form.Group as={Row} className="pt-3" controlId="newChatOptionReq">
