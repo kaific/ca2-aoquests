@@ -40,6 +40,7 @@ export default class App extends Component {
   render() {
     const loggedIn = this.state.loggedIn;
     const user = this.state.userInfo;
+    
     return (
       <BrowserRouter>
         <MyNavbar loggedIn={loggedIn} userInfo={user} onLogout={this.authHandler} />
@@ -50,12 +51,12 @@ export default class App extends Component {
               <Route path="/" exact component={HomePage} />
               <Route path="/register" exact component={(props) => <Register {...props} onLogin={this.authHandler} />} />
               <Route path="/login" exact component={(props) => <Login {...props} onLogin={this.authHandler} />}/>
-              <Route path="/npcs" exact component={(NpcIndex)} />
+              <Route path="/npcs" exact component={NpcIndex} />
               <Route path="/quests" exact component={QuestIndex} />
 
-              <Route path="/npcs/create" exact component={loggedIn && user.role === 'admin' ? (props) => <NpcCreate {...props}/> : <Redirect to="/"/>}/>
-              <Route path="/npcs/:id/edit" exact component={loggedIn && user.role === 'admin' ? (props) => <NpcEdit {...props} loggedIn={loggedIn}/> : <Redirect to="/"/>}/>
-              <Route path="/quests/create" exact component={loggedIn && user.role === 'admin' ? (props) => <QuestCreate {...props}/> : <Redirect to="/"/>}/>
+              <Route path="/npcs/create" exact>{loggedIn && user.role === 'admin' ? (props) => <NpcCreate {...props}/> : <Redirect to="/"/>}</Route>
+              <Route path="/npcs/:id/edit" exact>{loggedIn && user.role === 'admin' ? (props) => <NpcEdit {...props} loggedIn={loggedIn}/> : <Redirect to="/"/>}</Route>
+              <Route path="/quests/create" exact>{loggedIn && user.role === 'admin' ? (props) => <QuestCreate {...props}/> : <Redirect to="/"/>}</Route>
 
               <Route path="/npcs/:id" exact component={(props) => <NpcShow {...props} loggedIn={loggedIn}/>} />
               <Route path="/quests/:id" exact component={(props) => <QuestShow {...props} loggedIn={loggedIn}/>}/>
