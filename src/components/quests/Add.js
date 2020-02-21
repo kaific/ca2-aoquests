@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Card } from 'react-bootstrap';
+import { Row, Col, Card, Button } from 'react-bootstrap';
 
 class Zone extends Component {
   render() {
@@ -37,12 +37,23 @@ class Mission extends Component {
 
 class NPCDialogue extends Component {
   render() {
-    const { dialogue, npc } = this.props;
+    const { dialogue, npc, index, loadEdit } = this.props;
     var messages = dialogue.messages.slice(0,3);
-    console.log(messages);
+    // console.log(messages);
     return (
       <Col sm={4} className="pt-2">
         <Card body border="info" className="text-info">
+          <Row className="position-absolute fixed-top">
+            <Col sm={{span: 3, offset: 9}}>
+              <Button variant="info"
+                size="xs"
+                className="position-relative float-right"
+                onClick={() => loadEdit('npcDialogue', parseInt(index))}
+              >
+                Edit
+              </Button>
+            </Col>
+          </Row>
           {messages.map((msg, i) => {
             return (
               <React.Fragment key={i}>
@@ -58,16 +69,26 @@ class NPCDialogue extends Component {
 
 class NPCMessage extends Component {
   render() {
-    const {message, npc} = this.props;
+    const { message, npc, loadEdit } = this.props;
     return (
-      <Row as={Col} className="text-danger">
-        <small>{message.order+1}.&nbsp;</small>
-        {
-          message.emote ?
-            <><small className="text-secondary">(emote)</small>&nbsp;{message.content}</>
-          :
-            <><strong>{npc.name}:&nbsp;</strong>{message.content}</>
-        }
+      <Row as={Col} className="text-danger px-0 mb-2">
+        <Col sm="auto" className="pr-0">
+          <Button size="xs"
+            variant="danger"
+            onClick={() => loadEdit('npcMessage', parseInt(message.order))}
+          >
+            Edit
+          </Button>
+        </Col>
+        <Col sm="auto">
+          <small>{message.order+1}.&nbsp;</small>
+          {
+            message.emote ?
+              <><small className="text-secondary">(emote)</small>&nbsp;{message.content}</>
+            :
+              <><strong>{npc.name}:&nbsp;</strong>{message.content}</>
+          }
+        </Col>
       </Row>
     );
   }

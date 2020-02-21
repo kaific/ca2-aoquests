@@ -39,6 +39,12 @@ export default class QuestCreate extends Component {
                 id: 1,
                 content: ''
             },
+            editing: {
+              mission: false,
+              npcDialogue: false,
+              npcMessage: false,
+              chatOption: false
+            },
             zones: [],
             npcs: [],
             loading: true
@@ -102,7 +108,7 @@ export default class QuestCreate extends Component {
             await this.setState({
                 mission
             });
-            console.log(this.state.mission)
+            // console.log(this.state.mission)
             return;
         }
 
@@ -147,7 +153,7 @@ export default class QuestCreate extends Component {
                   if(z.zone === zone[0].zone) {
                     return zoneIndex = index;
                   }
-                  return;
+                  return null;
                 });
 
                 this.setState(state => {
@@ -230,8 +236,13 @@ export default class QuestCreate extends Component {
                 return {
                     mission,
                     newNpcDialogue : {
-                        messages: [],
-                        trigger: 0
+                      messages: [],
+                      trigger: 0
+                    },
+                    newNpcMessage: {
+                      emote: false,
+                      order: 0,
+                      content: ''
                     }
                 }
             });
@@ -258,6 +269,62 @@ export default class QuestCreate extends Component {
         });
       }
       return;
+    };
+
+    loadEdit = (type, index) => {
+      switch(type) {
+        case 'mission':
+          // console.log(`${type}: ${index}`)
+          break;
+
+        case 'npcDialogue':
+          var newNpcDialogue = this.state.mission.dialogue.npcDialogue[index];
+          var { editing, newNpcMessage } = this.state;
+          editing[type] = true;
+          editing.npcMessage = false;
+          newNpcMessage = {
+            emote: false,
+            order: 0,
+            content: ''
+          }
+          this.setState({ newNpcDialogue, editing, newNpcMessage });
+          break;
+
+        case 'npcMessage':
+          var newNpcMessage = this.state.newNpcDialogue.messages[index];
+          var {editing} = this.state;
+          editing[type] = true;
+          this.setState({ newNpcMessage, editing });
+          break;
+
+        case 'chatOption':
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    saveEdit = (type, index) => {
+      switch(type) {
+        case 'npcMessage':
+          var modNpcDialogue = this.state.newNpcDialogue;
+          var modNpcMessage = this.state.newNpcMessage;
+          var {editing} = this.state;
+
+          modNpcDialogue.messages[index] = modNpcMessage;
+          editing[type] = false;
+          var newNpcMessage = {
+            emote: false,
+            order: modNpcDialogue.messages.length,
+            content: ''
+          }
+
+          this.setState({ newNpcDialogue: modNpcDialogue, newNpcMessage});
+          break;
+        default:
+          break;
+      }
     };
 
     popLastOption = () => {
@@ -303,7 +370,7 @@ export default class QuestCreate extends Component {
     missionList() {
         if(this.state.missions.length > 0) {
             return this.state.missions.map((mission, index) => {
-                return <Mission mission={mission} key={index}/>
+                return <Mission mission={mission} loadEdit={this.loadEdit} key={index}/>
             });
         }
         return "You have not added any missions yet."
@@ -312,7 +379,10 @@ export default class QuestCreate extends Component {
     messageList() {
       if(this.state.newNpcDialogue.messages.length > 0) {
         return this.state.newNpcDialogue.messages.map((msg, index) => {
-            return <NPCMessage message={msg} npc={this.state.mission.giver} key={index} />
+            return <NPCMessage message={msg} 
+              npc={this.state.mission.giver}
+              loadEdit={this.loadEdit}
+              key={index} />
         });
       }
       return "You have not added any messages yet."
@@ -325,7 +395,7 @@ export default class QuestCreate extends Component {
 
       if(npcDialogue.length > 0) {
         return npcDialogue.map((dlg, index) => {
-          return <NPCDialogue dialogue={dlg} npc={npc} key={index} />
+          return <NPCDialogue dialogue={dlg} npc={npc} index={index} loadEdit={this.loadEdit} key={index} />
         });
       }
       return <Col>You have not added an NPC turn yet.</Col>
@@ -344,9 +414,8 @@ export default class QuestCreate extends Component {
     }
 
     render() {
-        const { loading, locations, mission } = this.state;
-        console.log(this.state.mission.dialogue)
-        
+        const { loading, locations, mission, newNpcMessage, editing } = this.state;
+        // console.log(this.state.mission.dialogue)
         if(loading) {
             return (
                 <>
@@ -577,9 +646,14 @@ export default class QuestCreate extends Component {
                                                           />
                                                         </Col>
                                                         <InputGroup.Append as={Col} sm={12} className="justify-content-sm-center pt-3 px-0">
-                                                            <Button onClick={this.onAddNpcMsg} variant="outline-danger">
-                                                                Add Message
-                                                            </Button>
+                                                          {editing.npcMessage ?
+                                                          <Button onClick={() => this.saveEdit('npcMessage', parseInt(newNpcMessage.order))} variant="outline-danger">
+                                                            Save Message
+                                                          </Button>
+                                                          :
+                                                          <Button onClick={this.onAddNpcMsg} variant="outline-danger">
+                                                            Add Message
+                                                          </Button>}
                                                         </InputGroup.Append>
                                                       </InputGroup>
                                                     </Card>
@@ -607,9 +681,14 @@ export default class QuestCreate extends Component {
                                                   </Form.Group>
                                                 </Col>
                                                 <InputGroup.Append as={Col} sm={12} className="pt-3 justify-content-md-center">
-                                                    <Button onClick={this.onAddNpcDlg} variant="outline-info">
-                                                        Add NPC Turn
-                                                    </Button>
+                                                  {editing.npcDialogue ?
+                                                  <Button onClick={() => this.saveEdit('npcDialogue', parseInt(0))} variant="outline-info">
+                                                    Save NPC Turn
+                                                  </Button>
+                                                  :
+                                                  <Button onClick={this.onAddNpcDlg} variant="outline-info">
+                                                    Add NPC Turn
+                                                  </Button>}
                                                 </InputGroup.Append>
                                             </InputGroup>
                                             </Card>
@@ -698,6 +777,13 @@ export default class QuestCreate extends Component {
                                     * 
                                     */
                                     }
+                                    <Form.Group controlId="editMission">
+                                      <Button
+                                        onClick={() => this.loadEdit('mission', 1)}
+                                      >
+                                        Edit Mission
+                                      </Button>
+                                    </Form.Group>
                                     { this.missionList() }
                                 </Col>
                             </Form.Group>

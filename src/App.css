@@ -25,6 +25,11 @@
   color: white;
 }
 
+.btn-xs {
+  padding: 2px 4px !important;
+  font-size: 11px !important;
+}
+
 .border-option {
   border-color: #c48510 !important;
 }
