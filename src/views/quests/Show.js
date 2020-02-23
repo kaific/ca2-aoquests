@@ -25,7 +25,7 @@ export default class QuestShow extends Component {
     console.log(this.props);
     axios.get(`http://localhost:4000/quests/${id}`)
     .then(response => {
-      console.log("mission 1:", response.data.missions[0]);
+      // console.log("mission 1:", response.data.missions[0]);
       if(response.data.missions.length !== 0) {
         this.setState({
           quest: response.data,
