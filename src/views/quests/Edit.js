@@ -78,7 +78,7 @@ export default class QuestEdit extends Component {
               checkDlg: checkDlg,
               dialogue: m.dialogue
             };
-            missions.push(mission);
+            return missions.push(mission);
           });
           console.log(missions)
         }

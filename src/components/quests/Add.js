@@ -240,7 +240,7 @@ class NewNpcDialogue extends Component {
   render() {
     const { 
       handleInputChange, onAddNpcDlg, onAddNpcMsg, saveEdit, messageList, formChatOptionsList,
-      newNpcDialogue, newNpcMessage, editing, mission
+      newNpcDialogue, newNpcMessage, editing
     } = this.props;
     return (
       <Card body border="info">
@@ -348,7 +348,7 @@ class NewChatOption extends Component {
   render() {
     const {
       handleInputChange, onAddChatOption, saveEdit, formChatOptionsList,
-      mission, newChatOption, editing
+      newChatOption, editing
     } = this.props;
     return (
       <Card body border="option">
