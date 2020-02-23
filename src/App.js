@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Container from 'react-bootstrap/Container';
 import { Row, Col } from 'react-bootstrap';
 import { BrowserRouter, Route, Switch, Redirect, /*BrowserHistory*/ } from 'react-router-dom';
@@ -68,3 +69,7 @@ export default class App extends Component {
     );
   }
 }
+
+App.propTypes = {
+  history: PropTypes.object
+};

@@ -25,6 +25,18 @@
   color: white;
 }
 
+.btn-option {
+  background-color: #c48510 !important;
+  border-color: #c48510 !important;
+  color: white;
+}
+
+.btn-option:hover {
+  background-color: #7e550a !important;
+  border-color: #7e550a !important;
+  color: white;
+}
+
 .btn-xs {
   padding: 2px 4px !important;
   font-size: 11px !important;
