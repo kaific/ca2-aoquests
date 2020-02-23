@@ -483,7 +483,7 @@ export default class QuestEdit extends Component {
       console.log("No quest name");
       return;
     }
-    
+
     axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
     await axios.put(`http://localhost:4000/quests/${id}`, quest)
     .then(res => {
@@ -566,6 +566,17 @@ export default class QuestEdit extends Component {
 
     window.location = '/quests/' + id;
   };
+
+  onDelete = () => {
+    const { id } = this.props.match.params;
+
+    axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
+    axios.delete('http://localhost:4000/quests/' + id)
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
+
+    window.location = '/quests';
+  }
 
   missionList = () => {
     if(this.state.missions.length > 0) {
@@ -674,7 +685,8 @@ export default class QuestEdit extends Component {
               <Form.Group as={Row}>
                 <Col sm={ { span: 10, offset: 2 } } className="pt-2">
                   <Button type="submit" variant="outline-secondary" className="mr-2"><h5 className="my-2">SAVE QUEST</h5></Button>
-                  <Button onClick={this.props.history.goBack} variant="outline-danger"><h5 className="my-2">CANCEL</h5></Button>
+                  <Button onClick={this.props.history.goBack} variant="outline-danger" className="mr-2"><h5 className="my-2">CANCEL</h5></Button>
+                  <Button onClick={this.onDelete} variant="danger"><h5 className="my-2">DELETE</h5></Button>
                 </Col>
               </Form.Group>
 
