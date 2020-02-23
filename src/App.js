@@ -17,6 +17,7 @@ import NpcEdit from './views/npcs/Edit';
 import QuestIndex from './views/quests/Index';
 import QuestShow from './views/quests/Show';
 import QuestCreate from './views/quests/Create';
+import QuestEdit from './views/quests/Edit';
 
 import MyNavbar from './components/MyNavbar'
 
@@ -58,6 +59,7 @@ export default class App extends Component {
               <Route path="/npcs/create" exact>{loggedIn && user.role === 'admin' ? (props) => <NpcCreate {...props}/> : <Redirect to="/"/>}</Route>
               <Route path="/npcs/:id/edit" exact>{loggedIn && user.role === 'admin' ? (props) => <NpcEdit {...props} loggedIn={loggedIn}/> : <Redirect to="/"/>}</Route>
               <Route path="/quests/create" exact>{loggedIn && user.role === 'admin' ? (props) => <QuestCreate {...props}/> : <Redirect to="/"/>}</Route>
+              <Route path="/quests/:id/edit" exact>{loggedIn && user.role === 'admin' ? (props) => <QuestEdit {...props}/> : <Redirect to="/"/>}</Route>
 
               <Route path="/npcs/:id" exact component={(props) => <NpcShow {...props} loggedIn={loggedIn}/>} />
               <Route path="/quests/:id" exact component={(props) => <QuestShow {...props} loggedIn={loggedIn}/>}/>

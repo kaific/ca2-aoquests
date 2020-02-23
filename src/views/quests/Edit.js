@@ -5,7 +5,7 @@ import { Form, Row, Col, Button, Card } from 'react-bootstrap';
 
 import { Mission, NewMission } from '../../components/quests/Add'
 
-export default class QuestCreate extends Component {
+export default class QuestEdit extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -14,6 +14,7 @@ export default class QuestCreate extends Component {
       locations: ['Rubi-Ka', 'Shadowlands', 'APF', 'Legacy of the Xan'],
       missions: [],
       mission: {
+        _id: '',
         description: ``,
         zone: '',
         giver: {},
@@ -51,39 +52,78 @@ export default class QuestCreate extends Component {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const { id } = this.props.match.params;
+    var name, location;
+    var missions = [];
+
+    await axios.get(`http://localhost:4000/quests/${id}`)
+      .then(res => {
+        console.log(res.data)
+        if(res.data.missions.length > 0) {
+          res.data.missions.map(m => {
+            var checkDlg = false;
+            if(m.dialogue !== null) {
+              checkDlg = true;
+            }
+            var zone = m.giver.zone;
+            var mission = {
+              _id: m._id,
+              description: m.description,
+              zone: zone,
+              giver: m.giver,
+              order: m.order,
+              objective: m.objective,
+              reward: m.reward,
+              checkDlg: checkDlg,
+              dialogue: m.dialogue
+            };
+            missions.push(mission);
+          });
+          console.log(missions)
+        }
+        name = res.data.name;
+        location = res.data.location;
+        this.setState({
+          name, location, missions
+        });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    
     axios.get(`http://localhost:4000/npcs`)
     .then(response => {
-      var newMission = this.state.mission;
-      newMission.giver = response.data[0];
-      newMission.zone = response.data[0].zone;
+        var newMission = this.state.mission;
+        newMission.giver = response.data[0];
+        newMission.zone = response.data[0].zone;
 
-      var npcs = response.data;
-      var zones = [];
-      var npcsByZone = [];
+        var npcs = response.data;
+        var zones = [];
+        var npcsByZone = [];
 
-      npcs.map(npc => {
-        if(!zones.includes(npc.zone)) {
-          zones.push(npc.zone);
-          var obj = {zone: npc.zone, npcs: []};
-          npcsByZone.push(obj);
-        }
-        var simpleNpc = {_id: npc._id, name: npc.name};
-        npcsByZone.map(zone => {
-          if(zone.zone === npc.zone) {
-              zone.npcs.push(simpleNpc);
-          }
-          return null;
+        npcs.map(npc => {
+            if(!zones.includes(npc.zone)) {
+                zones.push(npc.zone);
+                var obj = {zone: npc.zone, npcs: []};
+                npcsByZone.push(obj);
+            }
+            var simpleNpc = {_id: npc._id, name: npc.name};
+            npcsByZone.map(zone => {
+                if(zone.zone === npc.zone) {
+                    zone.npcs.push(simpleNpc);
+                }
+                return null;
+            });
+            return null;
         });
-        return null;
-      });
 
-      this.setState({
-        zones,
-        npcs: npcsByZone,
-        loading: false,
-        mission: newMission
-      });
+        this.setState({
+            zones,
+            npcs: npcsByZone,
+            loading: false,
+            mission: newMission
+        });
     })
     .catch(error => {
       console.log(error);
@@ -430,6 +470,9 @@ export default class QuestCreate extends Component {
   onSubmit = async e => {
     e.preventDefault();
 
+    const { id } = this.props.match.params;
+    var mIds = [];
+
     const quest = {
       name: this.state.name,
       location: this.state.location,
@@ -440,19 +483,17 @@ export default class QuestCreate extends Component {
       return;
     }
 
-    await axios.post('http://localhost:4000/quests', quest)
+    await axios.put(`http://localhost:4000/quests/${id}`, quest)
     .then(res => {
       console.log(res);
-      quest._id = res.data.data._id;
     })
     .catch(err => console.log(err));
 
-    await console.log(quest._id);
-
     const missions = this.state.missions.map(m => {
+      mIds.push(m._id);
       if(m.dialogue === null) {
         return {
-          quest: quest._id,
+          quest: id,
           description: m.description,
           giver: m.giver._id,
           objective: m.objective,
@@ -462,7 +503,7 @@ export default class QuestCreate extends Component {
         };
       }
       var newM = {
-        quest: quest._id,
+        quest: id,
         description: m.description,
         giver: m.giver._id,
         objective: m.objective,
@@ -486,24 +527,16 @@ export default class QuestCreate extends Component {
           })
         }
       };
-      newM.dialogue.chatOptions.push({
-        id: newM.dialogue.chatOptions.length+1,
-        reqProgress: false,
-        reqOption: 0,
-        content: 'Goodbye',
-        killOptions: []
-      });
-      newM.dialogue.chatOptions.map(opt => {
-        return opt.killOptions.push(newM.dialogue.chatOptions.length);
-      });
       return newM;
     });
 
-    await axios.post('http://localhost:4000/missions', missions)
+    await mIds.map(async (mId, i)=> {
+      await axios.put(`http://localhost:4000/missions/${mId}`, missions[i])
       .then(res => console.log(res))
       .catch(err => console.log(err))
+    });
 
-    window.location = '/quests/' + quest._id;
+    window.location = '/quests/' + id;
   };
 
   missionList = () => {
@@ -612,7 +645,7 @@ export default class QuestCreate extends Component {
 
               <Form.Group as={Row}>
                 <Col sm={ { span: 10, offset: 2 } } className="pt-2">
-                  <Button type="submit" variant="outline-secondary" className="mr-2"><h5 className="my-2">ADD QUEST</h5></Button>
+                  <Button type="submit" variant="outline-secondary" className="mr-2"><h5 className="my-2">SAVE QUEST</h5></Button>
                   <Button onClick={this.props.history.goBack} variant="outline-danger"><h5 className="my-2">CANCEL</h5></Button>
                 </Col>
               </Form.Group>
@@ -627,6 +660,6 @@ export default class QuestCreate extends Component {
   }
 }
 
-QuestCreate.propTypes = {
+QuestEdit.propTypes = {
   history: PropTypes.object.isRequired
 };
