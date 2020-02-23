@@ -1,7 +1,23 @@
 const router = require('express').Router();
-const mongoose = require('mongoose');
+const passport = require('passport');
+const settings = require('../config/passport')(passport);
 
 let Mission = require('../models/Mission');
+
+const getToken = (headers) => {
+  if(headers && headers.authorization) {
+    let parted = headers.authorization.split(' ');
+    if(parted.length === 2) {
+      return parted[1];
+    }
+    else {
+      return null;
+    }
+  }
+  else {
+    return null;
+  }
+};
 
 // ======================
 // GET ALL
@@ -51,43 +67,46 @@ router.route("/:id").get((req, res) => {
 // CREATE
 // ======================
 
-router.route("/").post(async (req, res) => {
+router.route("/").post(passport.authenticate('jwt', { session: false }), async (req, res) => {
+  const token = getToken(req.headers);
   const mission = req.body;
 
-  // Multiple Missions
-  if(Array.isArray(mission)) {
-    try {
-      var missions = mission.map(m => {
-        return new Mission(m);
-      });
-      await missions.map(async m => {await m.save()});
-      res.json({ message: "Missions added successfully!" });   
+  if(token && req.user.role === "admin") {
+    // Multiple Missions
+    if(Array.isArray(mission)) {
+      try {
+        var missions = mission.map(m => {
+          return new Mission(m);
+        });
+        await missions.map(async m => {await m.save()});
+        res.json({ message: "Missions added successfully!" });   
+      }
+      catch(err) {
+        res.json({ error: err })
+      }
     }
-    catch(err) {
-      res.json({ error: err })
+    // Single Mission
+    else {
+      // Validate Mission
+      if(!mission.description) {
+        return res.status(400).json({
+          message: "Mission name cannot be empty."
+        });
+      }
+
+      const newMission = new Mission(mission);
+      newMission.save()
+        .then(() => {
+          res.json('Mission added!');
+        })
+        .catch(err => res.status(400).json('Error: ' + err));
     }
   }
-  // Single Mission
   else {
-    // Validate Mission
-    if(!mission.description) {
-      return res.status(400).json({
-        message: "Mission name cannot be empty."
-      });
-    }
-
-    // if(!(mission.npc instanceof mongoose.Schema.Types.ObjectId)) {
-    //   return res.status(400).json({
-    //     message: "Incorrect NPC reference."
-    //   });
-    // }
-  
-    const newMission = new Mission(mission);
-    newMission.save()
-      .then(() => {
-        res.json('Mission added!');
-      })
-      .catch(err => res.status(400).json('Error: ' + err));
+    return res.status(403).json({
+      success: false,
+      message: 'Unauthorised.'
+    });
   }
 });
 
@@ -95,64 +114,81 @@ router.route("/").post(async (req, res) => {
 // UPDATE
 // ======================
 
-router.route("/:id").put((req, res) => {
+router.route("/:id").put(passport.authenticate('jwt', { session: false }), (req, res) => {
+  const token = getToken(req.headers)
   const missionId = req.params.id;
   const newMission = req.body;
 
-  if(!newMission.description) {
-    return res.status(400).json({
-      message: "Mission description cannot be empty."
+  if(token && req.user.role === "admin") { 
+    if(!newMission.description) {
+      return res.status(400).json({
+        message: "Mission description cannot be empty."
+      });
+    }
+
+    Mission.findByIdAndUpdate(missionId, newMission, {new: true})
+    .then(mission => {
+      if(!mission) {
+        return res.status(404).json({
+          message: "Mission not found with id " + missionId
+        });
+      }
+      res.json(mission);
+    })
+    .catch(err => {
+      if(err.kind === 'ObjectId') {
+        return res.status(404).json({
+          message: "Mission not found with id " + missionId
+        });
+      }
+      return res.status(500).json({
+        message: "Error updating Mission with id " + missionId
+      });
     });
   }
-
-  Mission.findByIdAndUpdate(missionId, newMission, {new: true})
-  .then(mission => {
-    if(!mission) {
-      return res.status(404).json({
-        message: "Mission not found with id " + missionId
-      });
-    }
-    res.json(mission);
-  })
-  .catch(err => {
-    if(err.kind === 'ObjectId') {
-      return res.status(404).json({
-        message: "Mission not found with id " + missionId
-      });
-    }
-    return res.status(500).json({
-      message: "Error updating Mission with id " + missionId
+  else {
+    return res.status(403).json({
+      success: false,
+      message: 'Unauthorised.'
     });
-  });
-
+  }
 });
 
 // ======================
 // DELETE
 // ======================
 
-router.route("/:id").delete((req, res) => {
+router.route("/:id").delete(passport.authenticate('jwt', { session: false }), (req, res) => {
+  const token = getToken(req.headers)
   const missionId = req.params.id;
 
-  Mission.findByIdAndDelete(missionId)
-  .then(mission => {
-    if(!mission) {
-      return res.status(404).json({
-        message: "Mission not found with id " + missionId
+  if(token && req.user.role === "admin") {  
+    Mission.findByIdAndDelete(missionId)
+    .then(mission => {
+      if(!mission) {
+        return res.status(404).json({
+          message: "Mission not found with id " + missionId
+        });
+      }
+      res.json({message: "Mission deleted successfully."});
+    })
+    .catch(err => {
+      if(err.kind === 'ObjectId' || err.name === 'NotFound') {
+        return res.status(404).json({
+          message: "Mission not found with id " + missionId
+        });
+      }
+      return res.status(500).json({
+        message: "Could not delete Mission with id " + missionId
       });
-    }
-    res.json({message: "Mission deleted successfully."});
-  })
-  .catch(err => {
-    if(err.kind === 'ObjectId' || err.name === 'NotFound') {
-      return res.status(404).json({
-        message: "Mission not found with id " + missionId
-      });
-    }
-    return res.status(500).json({
-      message: "Could not delete Mission with id " + missionId
     });
-  });
+  }
+  else {
+    return res.status(403).json({
+      success: false,
+      message: 'Unauthorised.'
+    });
+  }
 });
 
 module.exports = router;

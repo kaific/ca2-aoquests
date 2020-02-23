@@ -483,7 +483,8 @@ export default class QuestEdit extends Component {
       console.log("No quest name");
       return;
     }
-
+    
+    axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
     await axios.put(`http://localhost:4000/quests/${id}`, quest)
     .then(res => {
       console.log(res);

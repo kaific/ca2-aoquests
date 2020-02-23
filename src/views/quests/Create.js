@@ -440,6 +440,7 @@ export default class QuestCreate extends Component {
       return;
     }
 
+    axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
     await axios.post('http://localhost:4000/quests', quest)
     .then(res => {
       console.log(res);

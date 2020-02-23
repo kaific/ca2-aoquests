@@ -1,7 +1,23 @@
 const router = require('express').Router();
-const mongoose = require('mongoose');
+const passport = require('passport');
+const settings = require('../config/passport')(passport);
 
 let Quest = require('../models/Quest');
+
+const getToken = (headers) => {
+  if(headers && headers.authorization) {
+    let parted = headers.authorization.split(' ');
+    if(parted.length === 2) {
+      return parted[1];
+    }
+    else {
+      return null;
+    }
+  }
+  else {
+    return null;
+  }
+};
 
 // ======================
 // GET ALL
@@ -69,95 +85,120 @@ router.route('/').get((req, res) => {
   // CREATE
   // ======================
   
-  router.route("/").post((req, res) => {
+  router.route("/").post(passport.authenticate('jwt', { session: false }), (req, res) => {
+    const token = getToken(req.headers);
     const quest = req.body;
-  
-    //validate quest
-    if(!quest.name) {
-      return res.status(400).json({
-        message: "Quest name cannot be empty."
+    
+    if(token && req.user.role === "admin") {
+      //validate quest
+      if(!quest.name) {
+        return res.status(400).json({
+          message: "Quest name cannot be empty."
+        });
+      }
+    
+      const newQuest = new Quest(quest);
+      newQuest.save((err, result) => {
+        if(err) return res.status(400).json('Error: ' + err);
+        res.json({
+          message: "Quest added!",
+          data: result
+        })
+      })
+      // newQuest.save()
+      //   .then(() => {
+      //     res.json('Quest added!');
+      //   })
+      //   .catch(err => res.status(400).json('Error: ' + err));
+    }
+    else {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorised.'
       });
     }
-  
-    const newQuest = new Quest(quest);
-    newQuest.save((err, result) => {
-      if(err) return res.status(400).json('Error: ' + err);
-      res.json({
-        message: "Quest added!",
-        data: result
-      })
-    })
-    // newQuest.save()
-    //         .then(() => {
-    //           res.json('Quest added!');
-    //         })
-    //         .catch(err => res.status(400).json('Error: ' + err));
   });
   
   // ======================
   // UPDATE
   // ======================
   
-  router.route("/:id").put((req, res) => {
+  router.route("/:id").put(passport.authenticate('jwt', { session: false }), (req, res) => {
+    const token = getToken(req.headers);
     const questId = req.params.id;
     const newQuest = req.body;
   
-    if(!newQuest.name) {
-      return res.status(400).json({
-        message: "Quest name cannot be empty."
+    if(token && req.user.role === "admin") { 
+      if(!newQuest.name) {
+        return res.status(400).json({
+          message: "Quest name cannot be empty."
+        });
+      }
+    
+      Quest.findByIdAndUpdate(questId, newQuest, {new: true})
+      .then(quest => {
+        if(!quest) {
+          return res.status(404).json({
+            message: "Quest not found with id " + questId
+          });
+        }
+        res.json(quest);
+      })
+      .catch(err => {
+        if(err.kind === 'ObjectId') {
+          return res.status(404).json({
+            message: "Quest not found with id " + questId
+          });
+        }
+        return res.status(500).json({
+          message: "Error updating Quest with id " + questId
+        });
       });
     }
-  
-    Quest.findByIdAndUpdate(questId, newQuest, {new: true})
-    .then(quest => {
-      if(!quest) {
-        return res.status(404).json({
-          message: "Quest not found with id " + questId
-        });
-      }
-      res.json(quest);
-    })
-    .catch(err => {
-      if(err.kind === 'ObjectId') {
-        return res.status(404).json({
-          message: "Quest not found with id " + questId
-        });
-      }
-      return res.status(500).json({
-        message: "Error updating Quest with id " + questId
+    else {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorised.'
       });
-    });
-  
+    }
   });
   
   // ======================
   // DELETE
   // ======================
   
-  router.route("/:id").delete((req, res) => {
+  router.route("/:id").delete(passport.authenticate('jwt', { session: false }), (req, res) => {
+    const token = getToken(req.headers);
     const questId = req.params.id;
   
-    Quest.findByIdAndDelete(questId)
-    .then(quest => {
-      if(!quest) {
-        return res.status(404).json({
-          message: "Quest not found with id " + questId
+    if(token && req.user.role === "admin") { 
+      Quest.findByIdAndDelete(questId)
+      .then(quest => {
+        if(!quest) {
+          return res.status(404).json({
+            message: "Quest not found with id " + questId
+          });
+        }
+        res.json({message: "Quest deleted successfully."});
+      })
+      .catch(err => {
+        if(err.kind === 'ObjectId' || err.name === 'NotFound') {
+          return res.status(404).json({
+            message: "Quest not found with id " + questId
+          });
+        }
+        return res.status(500).json({
+          message: "Could not delete Quest with id " + questId
         });
-      }
-      res.json({message: "Quest deleted successfully."});
-    })
-    .catch(err => {
-      if(err.kind === 'ObjectId' || err.name === 'NotFound') {
-        return res.status(404).json({
-          message: "Quest not found with id " + questId
-        });
-      }
-      return res.status(500).json({
-        message: "Could not delete Quest with id " + questId
       });
-    });
+    }
+    else {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorised.'
+      });
+    }
   });
-  
   
   module.exports = router;
   
