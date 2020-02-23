@@ -59,7 +59,7 @@ export default class QuestEdit extends Component {
 
     await axios.get(`http://localhost:4000/quests/${id}`)
       .then(res => {
-        console.log(res.data)
+        // console.log(res.data)
         if(res.data.missions.length > 0) {
           res.data.missions.map(m => {
             var checkDlg = false;
@@ -97,6 +97,7 @@ export default class QuestEdit extends Component {
         var newMission = this.state.mission;
         newMission.giver = response.data[0];
         newMission.zone = response.data[0].zone;
+        newMission.order = this.state.missions.length;
 
         var npcs = response.data;
         var zones = [];
@@ -490,7 +491,12 @@ export default class QuestEdit extends Component {
     .catch(err => console.log(err));
 
     const missions = this.state.missions.map(m => {
-      mIds.push(m._id);
+      if(m._id) {
+        mIds.push(m._id);
+      }
+      else {
+        mIds.push('new');
+      }
       if(m.dialogue === null) {
         return {
           quest: id,
@@ -530,10 +536,31 @@ export default class QuestEdit extends Component {
       return newM;
     });
 
-    await mIds.map(async (mId, i)=> {
-      await axios.put(`http://localhost:4000/missions/${mId}`, missions[i])
-      .then(res => console.log(res))
-      .catch(err => console.log(err))
+    await mIds.map(async (mId, i) => {
+      if(mId === 'new') {
+        if(missions[i].dialogue !== null) {
+          missions[i].dialogue.chatOptions.push({
+            id: missions[i].dialogue.chatOptions.length+1,
+            reqProgress: false,
+            reqOption: 0,
+            content: 'Goodbye',
+            killOptions: []
+          });
+          missions[i].dialogue.chatOptions.map(opt => {
+            return opt.killOptions.push(missions[i].dialogue.chatOptions.length);
+          });
+        }
+        await axios.post(`http://localhost:4000/missions`, missions[i])
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
+        // console.log("post new mish")
+      }
+      else {
+        await axios.put(`http://localhost:4000/missions/${mId}`, missions[i])
+        .then(res => console.log(res))
+        .catch(err => console.log(err));
+        // console.log("update existing mish")
+      }
     });
 
     window.location = '/quests/' + id;
@@ -572,7 +599,7 @@ export default class QuestEdit extends Component {
       <br/>
       <Col>
         <Card border="secondary">
-          <Card.Header><h3 className="my-1 text-secondary">Add new Quest</h3></Card.Header>
+          <Card.Header><h3 className="my-1 text-secondary">Edit Quest</h3></Card.Header>
           <Card.Body>
             <Form onSubmit={this.onSubmit}>
 
