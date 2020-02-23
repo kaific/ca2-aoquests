@@ -9,12 +9,12 @@ let Mission = require('../models/Mission');
 
 router.route('/').get((req, res) => {
   Mission.find()
-          .sort([['order', '1']])
-          .populate('quest', 'name')
-          .populate('giver', ['name', 'zone', 'coords'])
-          .exec()
-          .then(missions => res.json(missions))
-          .catch(err => res.status(400).json('Error: ' + err));
+    .sort([['order', '1']])
+    .populate('quest', 'name')
+    .populate('giver', ['name', 'zone', 'coords'])
+    .exec()
+    .then(missions => res.json(missions))
+    .catch(err => res.status(400).json('Error: ' + err));
 });
   
   // ======================
@@ -25,27 +25,26 @@ router.route("/:id").get((req, res) => {
   const missionId = req.params.id;
   
   Mission.findById(missionId)
-  .populate('quest', 'name')
-  .populate('giver', ['name', 'zone', 'coords'])
-  .then(result => {
-    if(!result) {
-      return res.status(404).json({
-        message: "Mission not found with id " + missionId
+    .populate('quest', 'name')
+    .populate('giver', ['name', 'zone', 'coords'])
+    .then(result => {
+      if(!result) {
+        return res.status(404).json({
+          message: "Mission not found with id " + missionId
+        });
+      }
+      res.json(result);
+    })
+    .catch(err => {
+      if(err.kind === 'ObjectId') {
+        return res.status(404).json({
+          message: "Mission not found with id " + missionId
+        });
+      }
+      return res.status(500).json({
+        message: "Error retrieving Mission with id " + missionId
       });
-    }
-    res.json(result);
-  })
-  .catch(err => {
-    if(err.kind === 'ObjectId') {
-      return res.status(404).json({
-        message: "Mission not found with id " + missionId
-      });
-    }
-    return res.status(500).json({
-      message: "Error retrieving Mission with id " + missionId
     });
-  });
-  
 });
 
 // ======================
@@ -85,10 +84,10 @@ router.route("/").post(async (req, res) => {
   
     const newMission = new Mission(mission);
     newMission.save()
-              .then(() => {
-                res.json('Mission added!');
-              })
-              .catch(err => res.status(400).json('Error: ' + err));
+      .then(() => {
+        res.json('Mission added!');
+      })
+      .catch(err => res.status(400).json('Error: ' + err));
   }
 });
 
@@ -156,6 +155,4 @@ router.route("/:id").delete((req, res) => {
   });
 });
 
-
 module.exports = router;
-  
