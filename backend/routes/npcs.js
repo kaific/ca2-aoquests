@@ -72,7 +72,7 @@ router.route('/').get(async (req, res) => {
     const token = getToken(req.headers);
     const npc = req.body;
     
-    if(token) {
+    if(token && req.user.role === "admin") {
       //validate npc
       if(!npc.name) {
         return res.status(400).json({
@@ -116,7 +116,7 @@ router.route('/').get(async (req, res) => {
     const npcId = req.params.id;
     const newNpc = req.body;
     
-    if(token) {
+    if(token && req.user.role === "admin") {
       if(!newNpc.name) {
         return res.status(400).json({
           message: "NPC name cannot be empty."
@@ -171,7 +171,7 @@ router.route('/').get(async (req, res) => {
     const token = getToken(req.headers);
     const npcId = req.params.id;
     
-    if(token) {
+    if(token && req.user.role === "admin") {
       Npc.findByIdAndDelete(npcId)
       .then(npc => {
         if(!npc) {
