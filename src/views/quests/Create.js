@@ -510,7 +510,7 @@ export default class QuestCreate extends Component {
       .then(res => console.log(res))
       .catch(err => console.log(err))
 
-    window.location = '/quests' + quest._id;
+    window.location = '/quests/' + quest._id;
   };
 
   missionList = () => {
