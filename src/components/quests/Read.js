@@ -25,7 +25,7 @@ class MissionInfo extends Component {
 
     return (
         <>
-        <Card>
+        <Card bg="sunset">
           <Card.Header>{chosenMission.description.split('\n')[0]}</Card.Header>
           <Card.Body>
             {chosenMission.giver ?
@@ -56,7 +56,7 @@ class MissionInfo extends Component {
         <br/>
         {chosenMission.dialogue !== null ?
         <>
-        <Card>
+        <Card bg="sunset">
           <Card.Header>{chosenMission.giver.name}</Card.Header>
           <Card.Body>
           {chosenMission.dialogue.npcDialogue.map((dlg) => {
@@ -72,7 +72,7 @@ class MissionInfo extends Component {
                       if(opt.id === dlg.trigger) {
                         return (
                           <React.Fragment key={index}>
-                            <span style={{color: 'green'}}>You: </span>
+                            <strong className="text-c2">You: </strong>
                             <span>{opt.content}</span>
                             <br/>
                           </React.Fragment>
@@ -81,8 +81,8 @@ class MissionInfo extends Component {
                       return null;
                     })
                     : ''}
-                    {!message.emote ? <span style={{color: 'blue'}}>{chosenMission.giver.name}: </span> : ''}
-                    <span>{message.content}</span><br/>
+                    {!message.emote ? <strong className="text-c1">{chosenMission.giver.name}: </strong> : ''}
+                    <span className={message.emote ? "font-italic" : ''}>{message.content}</span><br/>
                   </React.Fragment>
                 );
               });
@@ -90,7 +90,7 @@ class MissionInfo extends Component {
             })}
             {chosenOptions.includes(chosenMission.dialogue.chatOptions.length) ?
               <>
-                <span style={{color: 'green'}}>You: </span>
+                <strong className="text-c2">You: </strong>
                 <span>Goodbye.</span>
               </>
             : ''}

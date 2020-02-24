@@ -52,7 +52,7 @@ export default class QuestCreate extends Component {
   }
 
   componentDidMount() {
-    axios.get(`http://localhost:4000/npcs`)
+    axios.get((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `npcs`)
     .then(response => {
       var newMission = this.state.mission;
       newMission.giver = response.data[0];
@@ -441,7 +441,7 @@ export default class QuestCreate extends Component {
     }
 
     axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
-    await axios.post('http://localhost:4000/quests', quest)
+    await axios.post((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + 'quests', quest)
     .then(res => {
       console.log(res);
       quest._id = res.data.data._id;
@@ -500,7 +500,7 @@ export default class QuestCreate extends Component {
       return newM;
     });
 
-    await axios.post('http://localhost:4000/missions', missions)
+    await axios.post((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + 'missions', missions)
       .then(res => console.log(res))
       .catch(err => console.log(err))
 
@@ -539,8 +539,8 @@ export default class QuestCreate extends Component {
       <>
       <br/>
       <Col>
-        <Card border="secondary">
-          <Card.Header><h3 className="my-1 text-secondary">Add new Quest</h3></Card.Header>
+        <Card border="c2" bg="sunset">
+          <Card.Header><h3 className="my-1 text-c2">Add new Quest</h3></Card.Header>
           <Card.Body>
             <Form onSubmit={this.onSubmit}>
 
@@ -613,7 +613,7 @@ export default class QuestCreate extends Component {
 
               <Form.Group as={Row}>
                 <Col sm={ { span: 10, offset: 2 } } className="pt-2">
-                  <Button type="submit" variant="outline-secondary" className="mr-2"><h5 className="my-2">ADD QUEST</h5></Button>
+                  <Button type="submit" variant="outline-c1" className="mr-2"><h5 className="my-2">ADD QUEST</h5></Button>
                   <Button onClick={this.props.history.goBack} variant="outline-danger"><h5 className="my-2">CANCEL</h5></Button>
                 </Col>
               </Form.Group>

@@ -57,7 +57,7 @@ export default class QuestEdit extends Component {
     var name, location;
     var missions = [];
 
-    await axios.get(`http://localhost:4000/quests/${id}`)
+    await axios.get((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `quests/${id}`)
       .then(res => {
         // console.log(res.data)
         if(res.data.missions.length > 0) {
@@ -92,7 +92,7 @@ export default class QuestEdit extends Component {
         console.log(error);
       });
     
-    axios.get(`http://localhost:4000/npcs`)
+    axios.get((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `npcs`)
     .then(response => {
         var newMission = this.state.mission;
         newMission.giver = response.data[0];
@@ -485,7 +485,7 @@ export default class QuestEdit extends Component {
     }
 
     axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
-    await axios.put(`http://localhost:4000/quests/${id}`, quest)
+    await axios.put((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `quests/${id}`, quest)
     .then(res => {
       console.log(res);
     })
@@ -551,13 +551,13 @@ export default class QuestEdit extends Component {
             return opt.killOptions.push(missions[i].dialogue.chatOptions.length);
           });
         }
-        await axios.post(`http://localhost:4000/missions`, missions[i])
+        await axios.post((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `missions`, missions[i])
         .then(res => console.log(res))
         .catch(err => console.log(err));
         // console.log("post new mish")
       }
       else {
-        await axios.put(`http://localhost:4000/missions/${mId}`, missions[i])
+        await axios.put((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `missions/${mId}`, missions[i])
         .then(res => console.log(res))
         .catch(err => console.log(err));
         // console.log("update existing mish")
@@ -571,7 +571,7 @@ export default class QuestEdit extends Component {
     const { id } = this.props.match.params;
 
     axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
-    axios.delete('http://localhost:4000/quests/' + id)
+    axios.delete((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + 'quests/' + id)
     .then(res => console.log(res))
     .catch(err => console.log(err));
 

@@ -23,7 +23,7 @@ export default class QuestShow extends Component {
     const { id } = this.props.match.params;
 
     console.log(this.props);
-    axios.get(`http://localhost:4000/quests/${id}`)
+    axios.get((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `quests/${id}`)
     .then(response => {
       // console.log("mission 1:", response.data.missions[0]);
       if(response.data.missions.length !== 0) {
@@ -102,7 +102,7 @@ export default class QuestShow extends Component {
     return (
       <>
       <br/>
-      <Card>
+      <Card bg="sunset">
         <Card.Header as="h5">
             {quest.name}
         </Card.Header>
@@ -142,7 +142,7 @@ export default class QuestShow extends Component {
         </Card.Body>
       </Card>
       <br/>
-      <Card>
+      <Card bg="sunset">
         <Card.Body>
           <Row>
             <Form.Label column sm={3}>Choose Mission:</Form.Label>

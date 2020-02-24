@@ -22,7 +22,7 @@ export default class NpcEdit extends Component {
 
   componentDidMount() {
     const { id } = this.props.match.params;
-    axios.get(`http://localhost:4000/npcs/${id}`)
+    axios.get((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `npcs/${id}`)
     .then(response => {
       // console.log("response:", response);
       this.setState({
@@ -76,7 +76,7 @@ export default class NpcEdit extends Component {
     // console.log(npc);
 
     axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
-    axios.put(`http://localhost:4000/npcs/${id}`, npc)
+    axios.put((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `npcs/${id}`, npc)
     .then(res => {
       console.log(res.data);
       this.props.history.goBack();
@@ -91,7 +91,7 @@ export default class NpcEdit extends Component {
     const { id } = this.props.match.params;
 
     axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken');
-    axios.delete('http://localhost:4000/npcs/' + id)
+    axios.delete((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + 'npcs/' + id)
     .then(res => console.log(res))
     .catch(err => console.log(err));
 

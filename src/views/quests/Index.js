@@ -21,7 +21,7 @@ export default class QuestIndex extends Component {
   }
 
   componentDidMount() {
-    axios.get('http://localhost:4000/quests/')
+    axios.get((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + 'quests/')
     .then(response => {
       console.log(response);
       this.setState({
@@ -42,6 +42,7 @@ export default class QuestIndex extends Component {
   render() {
     return (
       <div>
+        <br/>
         <h3>Quest List</h3>
         <Table striped bordered hover variant="dark">
           <thead>

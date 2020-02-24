@@ -8,7 +8,7 @@ export default class HomePage extends Component {
       <br/>
       <Row>
         <Col sm={{span: 6, offset: 3}}>
-          <Card>
+          <Card bg="sunset">
             <Card.Header as="h5">Welcome</Card.Header>
             <Card.Body>
               Ohai there.

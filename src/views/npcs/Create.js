@@ -52,7 +52,7 @@ export default class NpcCreate extends Component {
     // console.log(npc);
 
     axios.defaults.headers.common['Authorization'] = localStorage.getItem('jwtToken')
-    axios.post('http://localhost:4000/npcs', npc)
+    axios.post((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + 'npcs', npc)
     .then(res => console.log(res.data))
     .catch(err => {
       console.log(err);

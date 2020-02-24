@@ -18,7 +18,7 @@ export default class NpcShow extends Component {
     const { id } = this.props.match.params;
 
     console.log(this.props);
-    axios.get(`http://localhost:4000/npcs/${id}`)
+    axios.get((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + `npcs/${id}`)
     .then(response => {
       // console.log("response:", response);
       this.setState({

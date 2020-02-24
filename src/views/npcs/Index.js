@@ -21,7 +21,7 @@ export default class NpcIndex extends Component {
   }
 
   componentDidMount() {
-    axios.get('http://localhost:4000/npcs/')
+    axios.get((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + 'npcs/')
     .then(response => {
       console.log(response);
       this.setState({
@@ -42,6 +42,7 @@ export default class NpcIndex extends Component {
   render() {
     return (
       <div>
+        <br/>
         <h3>Npc List</h3>
         <Table striped bordered hover variant="dark">
           <thead>

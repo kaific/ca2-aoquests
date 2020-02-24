@@ -15,7 +15,7 @@ export default class MyNavbar extends Component {
     const loggedIn = this.props.loggedIn;
 
     return (
-      <Navbar bg="light" expand="lg">
+      <Navbar bg="c4" expand="lg">
         <Navbar.Brand as={Link} to="/">AO Quests</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
