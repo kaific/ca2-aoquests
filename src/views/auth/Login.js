@@ -34,8 +34,6 @@ export default class Login extends Component {
       password: this.state.password
     }
 
-    console.log(user);
-
     axios.post((process.env.REACT_APP_BACKEND||'http://localhost:4000/account/') + 'login', user)
       .then(res => {
         // save token in local storage
