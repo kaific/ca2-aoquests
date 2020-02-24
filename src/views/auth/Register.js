@@ -38,7 +38,7 @@ export default class Register extends Component {
 
     console.log(user);
 
-    axios.post((process.env.REACT_APP_BACKEND||'http://localhost:4000/') + 'register', user)
+    axios.post((process.env.REACT_APP_BACKEND||'http://localhost:4000/account/') + 'register', user)
       .then(res => console.log(res.data))
       .catch(err => console.log(err));
 
