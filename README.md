@@ -8,12 +8,13 @@ packages such as React-Bootstrap, PropTypes, JSONWebToken, Passport and Bcrypt.
 
 ## LOCAL SETUP
 
-[Back-end]
+## Back-end
 ./backend
+
 ## 'npm install'
 ## 'npm run watch'
 
-[Front-end]
+## Front-end
 /
 ## 'npm install'
 ## 'npm start'
