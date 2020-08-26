@@ -9,16 +9,17 @@ packages such as React-Bootstrap, PropTypes, JSONWebToken, Passport and Bcrypt.
 ## LOCAL SETUP
 
 ## Back-end
-./backend
+Dir: ./backend
 
-## 'npm install'
-## 'npm run watch'
+'npm install'
+'npm run watch'
 
 ## Front-end
-/
-## 'npm install'
-## 'npm start'
+Dir: ./
+
+'npm install'
+'npm start'
 
 In order to have access to create, update and delete functionality, you must log in as an admin.
-## email: kaific@iadt.ie
-## password: password
+email: kaific@iadt.ie
+password: password
